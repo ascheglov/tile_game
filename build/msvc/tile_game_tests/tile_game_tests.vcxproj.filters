@@ -4,15 +4,62 @@
     <Filter Include="tests">
       <UniqueIdentifier>{dc20c102-e56c-44f2-a754-2b24f7e588a9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{52b3c9ea-0081-4707-abac-af5bb50a2a4e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tests\regression">
+      <UniqueIdentifier>{ddaedc2b-99fb-4d2e-a462-a4835a4e5de6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="docs">
+      <UniqueIdentifier>{130aad0b-f5da-43ee-ad1e-2ba30b699514}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tests\unit">
+      <UniqueIdentifier>{45046024-0dc5-43e0-8c69-94891d84afcf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\tests\catch_wrap.hpp">
       <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\tests\regression\TestClient.hpp">
+      <Filter>tests\regression</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\math.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\types.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Game.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\events.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Object.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\tests\test_printers.hpp">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\tests\unit\TestCanvas.hpp">
+      <Filter>tests\unit</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\tests\tests_main.cpp">
       <Filter>tests</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\tests\regression\spawn_tests.cpp">
+      <Filter>tests\regression</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\tests\unit\math_tests.cpp">
+      <Filter>tests\unit</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\..\docs\grid.txt">
+      <Filter>docs</Filter>
+    </Text>
   </ItemGroup>
 </Project>

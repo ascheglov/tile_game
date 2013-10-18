@@ -58,11 +58,19 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalIncludeDirectories>../../../tests;../../../src</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>$(TargetPath)
+exit 0</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>RUNNING TESTS</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -75,6 +83,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalIncludeDirectories>../../../tests;../../../src</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -82,12 +91,32 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <PostBuildEvent>
+      <Command>$(TargetPath)
+exit 0</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>RUNNING TESTS</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\events.hpp" />
+    <ClInclude Include="..\..\..\src\Game.hpp" />
+    <ClInclude Include="..\..\..\src\math.hpp" />
+    <ClInclude Include="..\..\..\src\Object.hpp" />
+    <ClInclude Include="..\..\..\src\types.hpp" />
     <ClInclude Include="..\..\..\tests\catch_wrap.hpp" />
+    <ClInclude Include="..\..\..\tests\regression\TestClient.hpp" />
+    <ClInclude Include="..\..\..\tests\test_printers.hpp" />
+    <ClInclude Include="..\..\..\tests\unit\TestCanvas.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\tests\regression\spawn_tests.cpp" />
     <ClCompile Include="..\..\..\tests\tests_main.cpp" />
+    <ClCompile Include="..\..\..\tests\unit\math_tests.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\..\docs\grid.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
