@@ -111,6 +111,7 @@ exit 0</Command>
     <ClInclude Include="..\..\..\tests\unit\TestCanvas.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\tests\regression\disconnect_tests.cpp" />
     <ClCompile Include="..\..\..\tests\regression\spawn_tests.cpp" />
     <ClCompile Include="..\..\..\tests\tests_main.cpp" />
     <ClCompile Include="..\..\..\tests\unit\math_tests.cpp" />

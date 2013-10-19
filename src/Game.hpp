@@ -42,6 +42,12 @@ public:
         return *m_objects[id];
     }
 
+    void remove(ObjectId id)
+    {
+        assert(m_objects.count(id) != 0);
+        m_objects.erase(id);
+    }
+
     std::unordered_map<ObjectId, std::unique_ptr<Object>> m_objects;
 
 private:
@@ -79,6 +85,21 @@ public:
                     otherObj.m_eventHandler->seePlayer(newPlayerInfo);
             }
         });
+    }
+
+    void disconnect(Object& obj)
+    {
+        obj.m_eventHandler->disconnect();
+        
+        forObjectsAround(obj.m_pos, [&](Object& otherObj)
+        {
+            if (&obj != &otherObj && otherObj.m_eventHandler)
+            {
+                otherObj.m_eventHandler->seeDisconnect(obj.m_id);
+            }
+        });
+        
+        m_objects.remove(obj.m_id);
     }
 
     template<typename Callback>

@@ -56,6 +56,9 @@
     <ClCompile Include="..\..\..\tests\unit\math_tests.cpp">
       <Filter>tests\unit</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\tests\regression\disconnect_tests.cpp">
+      <Filter>tests\regression</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\..\docs\grid.txt">
