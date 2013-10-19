@@ -150,7 +150,7 @@ public:
         {
             if (&obj != &otherObj && otherObj.m_eventHandler)
             {
-                otherObj.m_eventHandler->seeDisconnect(obj.m_id);
+                otherObj.m_eventHandler->seeDisappear(obj.m_id);
             }
         });
         
@@ -200,7 +200,7 @@ public:
             {
                 auto&& otherObj = *otherObjPtr;
                 if (otherObj.m_eventHandler)
-                    otherObj.m_eventHandler->seeDisconnect(obj.m_id);
+                    otherObj.m_eventHandler->seeDisappear(obj.m_id);
             }
         });
     }

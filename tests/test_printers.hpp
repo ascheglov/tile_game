@@ -15,8 +15,7 @@ inline std::ostream& operator<<(std::ostream& o, Dir d)
 {
     auto idx = static_cast<unsigned>(d);
     const char* table[] {"Right", "Up", "Left", "Down"};
-    assert(idx < _countof(table));
-    o << table[idx];
+    o << (idx < _countof(table) ? table[idx] : "UNDEFINED");
     return o;
 }
 
@@ -24,7 +23,6 @@ inline std::ostream& operator<<(std::ostream& o, PlayerState ps)
 {
     auto idx = static_cast<unsigned>(ps);
     const char* table[] {"Idle", "MovingOut", "MovingIn"};
-    assert(idx < _countof(table));
-    o << table[idx];
+    o << (idx < _countof(table) ? table[idx] : "UNDEFINED");
     return o;
 }

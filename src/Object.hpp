@@ -19,10 +19,10 @@ struct Object
     FullPlayerInfo getFullInfo() const
     {
         FullPlayerInfo inf;
-        inf.id = m_id;
-        inf.pos = m_pos;
-        inf.state = m_state;
-        inf.moveDir = m_moveDir;
+        inf.m_id = m_id;
+        inf.m_pos = m_pos;
+        inf.m_state = m_state;
+        inf.m_moveDir = m_moveDir;
         return inf;
     }
 

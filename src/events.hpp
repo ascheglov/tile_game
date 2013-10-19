@@ -5,10 +5,10 @@
 
 struct FullPlayerInfo
 {
-    ObjectId id;
-    Point pos;
-    PlayerState state;
-    Dir moveDir;
+    ObjectId m_id;
+    Point m_pos;
+    PlayerState m_state;
+    Dir m_moveDir;
 };
 
 struct MoveInfo
@@ -24,7 +24,7 @@ struct EventHandler
     virtual void seePlayer(const FullPlayerInfo& info) = 0;
 
     virtual void disconnect() = 0;
-    virtual void seeDisconnect(ObjectId id) = 0;
+    virtual void seeDisappear(ObjectId id) = 0;
 
     virtual void seeBeginMove(const MoveInfo& info) = 0;
     virtual void seeCrossCellBorder(ObjectId id) = 0;
