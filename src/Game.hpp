@@ -110,6 +110,8 @@ struct TimerQueue
 
 struct GameCfg
 {
+    int worldCX{8};
+    int worldCY{8};
     int playerViewRadius{2};
     int moveTicks{1};
 };
@@ -118,6 +120,14 @@ class Game
 {
 public:
     GameCfg m_cfg;
+
+    void setSpawns(std::vector<Point> spawns)
+    {
+        for (auto&& pt : spawns)
+            assert(pt.inside(m_cfg.worldCX, m_cfg.worldCY));
+
+        m_spawns.set(std::move(spawns));
+    }
 
     void newPlayer(EventHandler& eventHandler)
     {
@@ -157,8 +167,18 @@ public:
         m_objects.remove(obj.m_id);
     }
 
+    bool canMove(Object& obj, Dir direction)
+    {
+        auto pt = obj.m_pos;
+        moveRel(pt, direction);
+        return pt.inside(m_cfg.worldCX, m_cfg.worldCY);
+    }
+
     void beginMove(Object& obj, Dir direction)
     {
+        if (!canMove(obj, direction))
+            return;
+
         obj.m_state = PlayerState::MovingOut;
         obj.m_moveDir = direction;
 

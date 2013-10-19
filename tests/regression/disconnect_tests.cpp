@@ -8,7 +8,7 @@
 TEST_CASE("disconnect single client", "[game]")
 {
     Game game;
-    game.m_spawns.set({{3, 2}});
+    game.setSpawns({{3, 2}});
 
     TestClient A(game);
     REQUIRE(A.m_isConnected);
@@ -20,7 +20,7 @@ TEST_CASE("disconnect single client", "[game]")
 TEST_CASE("see other disconnects", "[game]")
 {
     Game game;
-    game.m_spawns.set({{1, 1}, {2, 2}});
+    game.setSpawns({{1, 1}, {2, 2}});
 
     TestClient A(game);
     TestClient B(game);
@@ -33,7 +33,7 @@ TEST_CASE("see other disconnects", "[game]")
 TEST_CASE("other disconnects far away", "[game]")
 {
     Game game;
-    game.m_spawns.set({{1, 1}, {10, 10}});
+    game.setSpawns({{1, 1}, {7, 7}});
 
     TestClient A(game);
     TestClient B(game);

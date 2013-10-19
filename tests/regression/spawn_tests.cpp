@@ -8,7 +8,7 @@
 TEST_CASE("spawn one", "[game]")
 {
     Game game;
-    game.m_spawns.set({{3, 2}});
+    game.setSpawns({{3, 2}});
 
     TestClient A(game);
 
@@ -20,7 +20,7 @@ TEST_CASE("spawn one", "[game]")
 TEST_CASE("spawn two nearby", "[game]")
 {
     Game game;
-    game.m_spawns.set({{3, 1}, {3, 2}});
+    game.setSpawns({{3, 1}, {3, 2}});
 
     TestClient A(game);
     TestClient B(game);
@@ -35,7 +35,7 @@ TEST_CASE("spawn two nearby", "[game]")
 TEST_CASE("spawn two apart", "[game]")
 {
     Game game;
-    game.m_spawns.set({{1, 1}, {10, 10}});
+    game.setSpawns({{0, 0}, {7, 7}});
 
     TestClient A(game);
     TestClient B(game);
