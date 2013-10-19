@@ -10,6 +10,9 @@ struct Object
 
     ObjectId m_id;
     Point m_pos;
+    PlayerState m_state{PlayerState::Idle};
+
+    Dir m_moveDir;
 
     EventHandler* m_eventHandler{nullptr};
 
@@ -18,6 +21,14 @@ struct Object
         FullPlayerInfo inf;
         inf.id = m_id;
         inf.pos = m_pos;
+        inf.state = m_state;
+        inf.moveDir = m_moveDir;
+        return inf;
+    }
+
+    MoveInfo getMoveInfo() const
+    {
+        MoveInfo inf = {m_id, m_moveDir};
         return inf;
     }
 };

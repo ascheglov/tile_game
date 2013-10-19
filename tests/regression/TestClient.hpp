@@ -13,6 +13,8 @@ struct TestClient : EventHandler
 
     ObjectId m_id;
     Point m_pos;
+    PlayerState m_state{PlayerState::Idle};
+    Dir m_moveDir;
 
     std::unordered_map<ObjectId, FullPlayerInfo> see;
 
@@ -22,6 +24,12 @@ struct TestClient : EventHandler
     {
         auto& obj = m_game->m_objects.getObject(m_id);
         m_game->disconnect(obj);
+    }
+
+    void requestMove(Dir direction)
+    {
+        auto& obj = m_game->m_objects.getObject(m_id);
+        m_game->beginMove(obj, direction);
     }
 
 private: // EventHandler implementation
@@ -47,5 +55,45 @@ private: // EventHandler implementation
     {
         assert(see.count(id) != 0);
         see.erase(id);
+    }
+
+    virtual void seeBeginMove(const MoveInfo& info) override
+    {
+        if (info.id == m_id)
+        {
+            m_state = PlayerState::MovingOut;
+            m_moveDir = info.moveDir;
+        }
+        else
+        {
+            see[info.id].state = PlayerState::MovingOut;
+            see[info.id].moveDir = info.moveDir;
+        }
+    }
+
+    virtual void seeCrossCellBorder(ObjectId id) override
+    {
+        if (id == m_id)
+        {
+            m_state = PlayerState::MovingIn;
+            moveRel(m_pos, m_moveDir);
+        }
+        else
+        {
+            see[id].state = PlayerState::MovingIn;
+            moveRel(see[id].pos, see[id].moveDir);
+        }
+    }
+
+    virtual void seeStop(ObjectId id) override
+    {
+        if (id == m_id)
+        {
+            m_state = PlayerState::Idle;
+        }
+        else
+        {
+            see[id].state = PlayerState::Idle;
+        }
     }
 };

@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cassert>
+#include <functional>
+#include <list>
 #include <memory>
 #include <unordered_map>
 
@@ -54,9 +56,62 @@ private:
     ObjectId m_lastObjectId{0};
 };
 
+struct TimerQueue
+{
+    using ticks_t = std::uint32_t;  // 1.36 years at 100 ticks per second
+
+    ticks_t m_now{0};
+
+    template<typename Callback>
+    void add(ObjectId id, unsigned delay, Callback&& callback)
+    {
+        m_queue.emplace_back(id, m_now + delay, callback);
+    }
+
+    template<typename Id2Obj>
+    void tick(Id2Obj&& id2obj)
+    {
+        ++m_now;
+        if (m_queue.empty())
+            return;
+
+        auto it = m_queue.begin();
+        auto next = it;
+        for (; it != m_queue.end(); it = next)
+        {
+            next = it; ++next;
+
+            if (it->elapsed(m_now))
+            {
+                it->callback(id2obj(it->id));
+                m_queue.erase(it);
+            }
+        }
+    }
+
+    struct Timer
+    {
+        template<typename Callback>
+        Timer(ObjectId id, ticks_t deadline, Callback&& callback)
+            : deadline(deadline)
+            , id(id)
+            , callback(std::forward<Callback>(callback))
+        {}
+
+        bool elapsed(ticks_t now) const { return now >= deadline; }
+
+        ticks_t deadline;
+        ObjectId id;
+        std::function<void(Object&)> callback;
+    };
+
+    std::list<Timer> m_queue;
+};
+
 struct GameCfg
 {
     int playerViewRadius{2};
+    int moveTicks{1};
 };
 
 class Game
@@ -102,6 +157,66 @@ public:
         m_objects.remove(obj.m_id);
     }
 
+    void beginMove(Object& obj, Dir direction)
+    {
+        obj.m_state = PlayerState::MovingOut;
+        obj.m_moveDir = direction;
+
+        m_timers.add(obj.m_id, m_cfg.moveTicks, [this](Object& o){ onCrossCellBorder(o); });
+
+        auto&& moveInfo = obj.getMoveInfo();
+        forObjectsAround(obj.m_pos, [&](Object& otherObj)
+        {
+            if (otherObj.m_eventHandler)
+                otherObj.m_eventHandler->seeBeginMove(moveInfo);
+        });
+    }
+
+    void onCrossCellBorder(Object& obj)
+    {
+        auto oldPos = obj.m_pos;
+
+        assert(obj.m_state == PlayerState::MovingOut);
+        obj.m_state = PlayerState::MovingIn;
+        moveRel(obj.m_pos, obj.m_moveDir);
+
+        m_timers.add(obj.m_id, m_cfg.moveTicks, [this](Object& o){ onStopMove(o); });
+
+        auto&& fullInfo = obj.getFullInfo();
+        forObjectsAround(obj.m_pos, [&](Object& otherObj)
+        {
+            if (otherObj.m_eventHandler)
+            {
+                if (isOnArc180(obj.m_pos, m_cfg.playerViewRadius, obj.m_moveDir, otherObj.m_pos))
+                    otherObj.m_eventHandler->seePlayer(fullInfo);
+                else
+                    otherObj.m_eventHandler->seeCrossCellBorder(obj.m_id);
+            }
+        });
+
+        forArc180(oldPos, m_cfg.playerViewRadius, oppositeDir(obj.m_moveDir), [&](const Point& pt)
+        {
+            if (auto otherObjPtr = objectAt(pt))
+            {
+                auto&& otherObj = *otherObjPtr;
+                if (otherObj.m_eventHandler)
+                    otherObj.m_eventHandler->seeDisconnect(obj.m_id);
+            }
+        });
+    }
+
+    void onStopMove(Object& obj)
+    {
+        assert(obj.m_state == PlayerState::MovingIn);
+        obj.m_state = PlayerState::Idle;
+
+        forObjectsAround(obj.m_pos, [&](Object& otherObj)
+        {
+            if (otherObj.m_eventHandler)
+                otherObj.m_eventHandler->seeStop(obj.m_id);
+        });
+    }
+
     template<typename Callback>
     void forObjectsAround(Point pt, Callback&& callback)
     {
@@ -113,6 +228,22 @@ public:
         }
     }
 
+    void tick()
+    {
+        auto&& id2obj = [this](ObjectId id) -> Object& { return m_objects.getObject(id); };
+        m_timers.tick(id2obj);
+    }
+
+    Object* objectAt(const Point& pt)
+    {
+        for (auto&& objPair : m_objects.m_objects)
+            if (objPair.second->m_pos == pt)
+                return objPair.second.get();
+
+        return nullptr;
+    }
+
     ObjectManager m_objects;
     SpawnPoints m_spawns;
+    TimerQueue m_timers;
 };

@@ -26,3 +26,81 @@ TEST_CASE("distance", "[math]")
         "00000000\n"
         );
 }
+
+TEST_CASE("move", "[math]")
+{
+    Point pt{1, 11};
+    auto moved = [=](Dir d){ auto newPt = pt; moveRel(newPt, d); return newPt; };
+    CHECK(moved(Dir::Right) == Point(2, 11));
+    CHECK(moved(Dir::Up) == Point(1, 10));
+    CHECK(moved(Dir::Left) == Point(0, 11));
+    CHECK(moved(Dir::Down) == Point(1, 12));
+}
+
+TEST_CASE("arc180", "[math]")
+{
+    Point origin{4, 3};
+    auto R = 2;
+    TestCanvas cnv{8, 7};
+
+    auto&& drawArc = [&](Dir dir)
+    {
+        forArc180(origin, R, dir, [&](Point pt) { cnv.draw(pt); });
+    };
+
+    SECTION("Right")
+    {
+        drawArc(Dir::Right);
+        REQUIRE(cnv.m_str == ""
+            "00000000\n"
+            "00001000\n"
+            "00000100\n"
+            "00000010\n"
+            "00000100\n"
+            "00001000\n"
+            "00000000\n"
+            );
+    }
+
+    SECTION("Up")
+    {
+        drawArc(Dir::Up);
+        REQUIRE(cnv.m_str == ""
+            "00000000\n"
+            "00001000\n"
+            "00010100\n"
+            "00100010\n"
+            "00000000\n"
+            "00000000\n"
+            "00000000\n"
+            );
+    }
+
+    SECTION("Left")
+    {
+        drawArc(Dir::Left);
+        REQUIRE(cnv.m_str == ""
+            "00000000\n"
+            "00001000\n"
+            "00010000\n"
+            "00100000\n"
+            "00010000\n"
+            "00001000\n"
+            "00000000\n"
+            );
+    }
+
+    SECTION("Down")
+    {
+        drawArc(Dir::Down);
+        REQUIRE(cnv.m_str == ""
+            "00000000\n"
+            "00000000\n"
+            "00000000\n"
+            "00100010\n"
+            "00010100\n"
+            "00001000\n"
+            "00000000\n"
+            );
+    }
+}
