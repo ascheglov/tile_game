@@ -106,14 +106,17 @@ TEST_CASE("move out of view area", "[game]")
     TestClient A(game);
     TestClient B(game);
 
+    REQUIRE_FALSE(A.see.empty());
     REQUIRE_FALSE(B.see.empty());
 
     A.requestMove(Dir::Right);
     game.tick();
 
+    REQUIRE(A.see.empty());
     REQUIRE(B.see.empty());
 
     game.tick(); // just in case
+    REQUIRE(A.see.empty());
     REQUIRE(B.see.empty());
 }
 
@@ -125,10 +128,15 @@ TEST_CASE("move into view area", "[game]")
     TestClient A(game);
     TestClient B(game);
 
+    REQUIRE(A.see.empty());
     REQUIRE(B.see.empty());
 
     A.requestMove(Dir::Left);
     game.tick();
+
+    REQUIRE_FALSE(A.see.empty());
+    REQUIRE(A.see[2].m_state == PlayerState::Idle);
+    REQUIRE(A.see[2].m_pos == Point(1, 2));
 
     REQUIRE_FALSE(B.see.empty());
     REQUIRE(B.see[1].m_state == PlayerState::MovingIn);

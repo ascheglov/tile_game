@@ -205,12 +205,21 @@ public:
         auto&& fullInfo = obj.getFullInfo();
         forObjectsAround(obj.m_pos, [&](Object& otherObj)
         {
+            bool seeAppears = isOnArc180(obj.m_pos, m_cfg.playerViewRadius, obj.m_moveDir, otherObj.m_pos);
+
+            if (seeAppears)
+                obj.m_eventHandler->seePlayer(otherObj.getFullInfo());
+
             if (otherObj.m_eventHandler)
             {
-                if (isOnArc180(obj.m_pos, m_cfg.playerViewRadius, obj.m_moveDir, otherObj.m_pos))
+                if (seeAppears)
+                {
                     otherObj.m_eventHandler->seePlayer(fullInfo);
+                }
                 else
+                {
                     otherObj.m_eventHandler->seeCrossCellBorder(obj.m_id);
+                }
             }
         });
 
@@ -219,6 +228,9 @@ public:
             if (auto otherObjPtr = objectAt(pt))
             {
                 auto&& otherObj = *otherObjPtr;
+
+                obj.m_eventHandler->seeDisappear(otherObj.m_id);
+
                 if (otherObj.m_eventHandler)
                     otherObj.m_eventHandler->seeDisappear(obj.m_id);
             }
