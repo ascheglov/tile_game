@@ -1,0 +1,19 @@
+#players > div
+{
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    padding-top: 7px;
+    padding-left: 12px;
+    background-repeat: no-repeat;
+}
+
+#players > div[state="0"] { background-image: url("img/player/idle.png"); }
+#players > div[state="1"][dir="0"] { background-image: url("img/player/move-out-right.png"); }
+#players > div[state="1"][dir="1"] { background-image: url("img/player/move-out-up.png"); }
+#players > div[state="1"][dir="2"] { background-image: url("img/player/move-out-left.png"); }
+#players > div[state="1"][dir="3"] { background-image: url("img/player/move-out-down.png"); }
+#players > div[state="2"][dir="0"] { background-image: url("img/player/move-in-right.png"); }
+#players > div[state="2"][dir="1"] { background-image: url("img/player/move-in-up.png"); }
+#players > div[state="2"][dir="2"] { background-image: url("img/player/move-in-left.png"); }
+#players > div[state="2"][dir="3"] { background-image: url("img/player/move-in-down.png"); }

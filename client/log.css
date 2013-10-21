@@ -1,0 +1,16 @@
+#log
+{
+    border: 1px solid black;
+    overflow: scroll;
+    padding: 2px;
+}
+
+#log>p
+{
+    margin: 0;
+}
+
+#log .error
+{
+    color: red;
+}

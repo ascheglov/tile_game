@@ -10,9 +10,6 @@
     <Filter Include="tests\regression">
       <UniqueIdentifier>{ddaedc2b-99fb-4d2e-a462-a4835a4e5de6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="docs">
-      <UniqueIdentifier>{130aad0b-f5da-43ee-ad1e-2ba30b699514}</UniqueIdentifier>
-    </Filter>
     <Filter Include="tests\unit">
       <UniqueIdentifier>{45046024-0dc5-43e0-8c69-94891d84afcf}</UniqueIdentifier>
     </Filter>
@@ -45,6 +42,9 @@
     <ClInclude Include="..\..\..\tests\unit\TestCanvas.hpp">
       <Filter>tests\unit</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\Server.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\tests\tests_main.cpp">
@@ -62,10 +62,5 @@
     <ClCompile Include="..\..\..\tests\regression\move_tests.cpp">
       <Filter>tests\regression</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="..\..\..\docs\grid.txt">
-      <Filter>docs</Filter>
-    </Text>
   </ItemGroup>
 </Project>

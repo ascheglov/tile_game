@@ -1,0 +1,31 @@
+#view_wrap
+{
+    position: absolute;
+    top:0;
+    left: 0;
+    width: 320px;
+}
+
+table#view td
+{
+    border: 1px solid black;
+    width: 32px;
+    height: 32px;
+}
+
+#menu>button
+{
+    float: left;
+}
+
+#menu>span
+{
+    display: block;
+    overflow: hidden;
+    padding-right: 8px;
+}
+
+#test-msg
+{
+    width: 100%;
+}

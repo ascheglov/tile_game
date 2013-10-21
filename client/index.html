@@ -1,0 +1,57 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Tile Game Test Client</title>
+
+    <link rel="stylesheet" href="player.css">
+    <link rel="stylesheet" href="log.css">
+    <link rel="stylesheet" href="index.css">
+
+    <script src="jquery-2.0.3.min.js"></script>
+    <script src="ui.js"></script>
+    <script src="connection.js"></script>
+    
+    <style>
+    #control
+    {
+        margin-left: 320px;
+    }    
+    </style>
+</head>
+<body>
+    <div id="view_wrap">
+    <table id="view">
+
+    <tr> <td/><td/><td/><td/> <td/><td/><td/><td/> </tr>
+    <tr> <td/><td/><td/><td/> <td/><td/><td/><td/> </tr>
+    <tr> <td/><td/><td/><td/> <td/><td/><td/><td/> </tr>
+    <tr> <td/><td/><td/><td/> <td/><td/><td/><td/> </tr>
+
+    <tr> <td/><td/><td/><td/> <td/><td/><td/><td/> </tr>
+    <tr> <td/><td/><td/><td/> <td/><td/><td/><td/> </tr>
+    <tr> <td/><td/><td/><td/> <td/><td/><td/><td/> </tr>
+    <tr> <td/><td/><td/><td/> <td/><td/><td/><td/> </tr>
+
+    </table>
+    <div id="players"></div>
+    </div>
+
+    <div id="control">
+        <div id="menu">
+            <button id="btn-connect">Connect</button>
+            <button id="btn-disconnect">Disconnect</button>
+            <button id="btn-test">Test message</button>
+            <span><input type="text" id="test-msg"></input></span>
+        </div>
+        <hr/>
+        <button class="btn-move" dir="left">&#x02C2;</button>
+        <button class="btn-move" dir="right">&#x02C3;</button>
+        <button class="btn-move" dir="up">&#x02C4;</button>
+        <button class="btn-move" dir="down">&#x02C5;</button>
+        <hr/>
+        <button id="btn-clear-log">Clear log</button>
+        <div id="log"></div>
+    </div>
+</body>
+</html>

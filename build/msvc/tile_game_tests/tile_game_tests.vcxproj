@@ -104,6 +104,7 @@ exit 0</Command>
     <ClInclude Include="..\..\..\src\Game.hpp" />
     <ClInclude Include="..\..\..\src\math.hpp" />
     <ClInclude Include="..\..\..\src\Object.hpp" />
+    <ClInclude Include="..\..\..\src\Server.hpp" />
     <ClInclude Include="..\..\..\src\types.hpp" />
     <ClInclude Include="..\..\..\tests\catch_wrap.hpp" />
     <ClInclude Include="..\..\..\tests\regression\TestClient.hpp" />
@@ -116,9 +117,6 @@ exit 0</Command>
     <ClCompile Include="..\..\..\tests\regression\spawn_tests.cpp" />
     <ClCompile Include="..\..\..\tests\tests_main.cpp" />
     <ClCompile Include="..\..\..\tests\unit\math_tests.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="..\..\..\docs\grid.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
