@@ -176,6 +176,9 @@ public:
 
     void beginMove(Object& obj, Dir direction)
     {
+        if (obj.m_state != PlayerState::Idle)
+            return;
+
         if (!canMove(obj, direction))
             return;
 

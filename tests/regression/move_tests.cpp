@@ -179,3 +179,24 @@ TEST_CASE("move across world boundaries", "[game]")
     B.requestMove(Dir::Down);
     REQUIRE(B.m_state == PlayerState::Idle);
 }
+
+TEST_CASE("ignore move request when moving", "[game]")
+{
+    Game game;
+    game.setSpawns({{1, 1}});
+    TestClient A(game);
+    A.requestMove(Dir::Right);
+    REQUIRE(A.m_state == PlayerState::MovingOut);
+    REQUIRE(A.m_moveDir == Dir::Right);
+
+    A.requestMove(Dir::Left);
+    REQUIRE(A.m_state == PlayerState::MovingOut);
+    REQUIRE(A.m_moveDir == Dir::Right);
+
+    game.tick();
+    REQUIRE(A.m_state == PlayerState::MovingIn);
+
+    A.requestMove(Dir::Left);
+    REQUIRE(A.m_state == PlayerState::MovingIn);
+    REQUIRE(A.m_moveDir == Dir::Right);
+}
