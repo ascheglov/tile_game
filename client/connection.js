@@ -5,8 +5,6 @@ var connection = (function()
 {
     var this_ = {}
 
-    var SERVER_URI = "ws://localhost:4080/";
-
     var websocket;
 
     var log = function(text) { this_.ui.log(text); }
@@ -19,9 +17,9 @@ var connection = (function()
         websocket.send(msg);
     }
 
-    this_.connect = function()
+    this_.connect = function(uri)
     {
-        websocket = new WebSocket(SERVER_URI);
+        websocket = new WebSocket(uri);
         websocket.onopen = function(evt) { log("CONNECTED"); };
         websocket.onclose = function(evt)
         {

@@ -62,7 +62,7 @@ $(document).ready(function()
     $("#btn-connect").click(function()
     {
         $('#players').empty();
-        connection.connect();
+        connection.connect($('#server-uri').val());
     });
 
     $("#btn-disconnect").click(function()
