@@ -46,6 +46,7 @@ var connection = (function()
         default: log_error('invalid "dir" attribute');
         }
 
+        this_.ui.moveView(info);
         this_.ui.setPos(el, info);
         info.state = PlayerState.MovingIn;
         this_.ui.setState(el, info);
@@ -53,7 +54,12 @@ var connection = (function()
 
     var messageHandlers =
     {
-        init: function(pkt) { pkt.state = PlayerState.Idle; this_.ui.addPlayer(pkt); },
+        init: function(pkt)
+        {
+            pkt.state = PlayerState.Idle;
+            this_.ui.moveView(pkt);
+            this_.ui.addPlayer(pkt);
+        },
         see_player: function(pkt) { this_.ui.addPlayer(pkt); },
         disconnect: function(pkt) { log('disconnected by server'); },
         see_disappear: function(pkt) { this_.ui.removePlayer(pkt.id); },

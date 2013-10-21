@@ -2,6 +2,8 @@ var ui = (function()
 {
     var this_ = {}
 
+    var worldCX = 8, worldCY = 8;
+
     var cellOffset = function(x, y)
     {
         return $('#view tr:eq(' + y + ') td:eq(' + x + ')').offset();
@@ -52,6 +54,23 @@ var ui = (function()
         return el.attr(name);
     };
 
+    this_.moveView = function(info)
+    {
+        var distance = function(x, y)
+        {
+            return Math.abs(x - info.x) + Math.abs(y - info.y);
+        };
+
+        for (var y = 0; y != worldCY; y++)
+        {
+            var tr = $('#view tr').eq(y);
+            for (var x = 0; x != worldCY; x++)
+            {
+                $('td', tr).eq(x).toggleClass('v', distance(x, y) <= 2);
+            }
+        }
+    };
+
     return this_;
 })();
 
@@ -62,6 +81,8 @@ $(document).ready(function()
     $("#btn-connect").click(function()
     {
         $('#players').empty();
+        $('#view td').removeClass('v');
+
         connection.connect($('#server-uri').val());
     });
 

@@ -8,9 +8,14 @@
 
 table#view td
 {
-    border: 1px solid black;
+    border: 1px dotted lightgray;
     width: 32px;
     height: 32px;
+}
+
+table#view td.v
+{
+    border: 1px solid black;
 }
 
 #menu>button
