@@ -1,3 +1,6 @@
+var Dir = {Right: 0, Up: 1, Left: 2, Down: 3};
+var PlayerState = {Idle: 0, MovingOut: 1, MovingIn: 2};
+
 var connection = (function()
 {
     var this_ = {}
@@ -38,34 +41,34 @@ var connection = (function()
 
         switch (info.dir)
         {
-        case 0: info.x += 1; break;
-        case 1: info.y -= 1; break;
-        case 2: info.x -= 1; break;
-        case 3: info.y += 1; break;
+        case Dir.Right: info.x += 1; break;
+        case Dir.Up: info.y -= 1; break;
+        case Dir.Left: info.x -= 1; break;
+        case Dir.Down: info.y += 1; break;
         default: log_error('invalid "dir" attribute');
         }
 
         this_.ui.setPos(el, info);
-        info.state = 2;
+        info.state = PlayerState.MovingIn;
         this_.ui.setState(el, info);
     }
 
     var messageHandlers =
     {
-        init: function(pkt) { pkt.state = 0; this_.ui.addPlayer(pkt); },
+        init: function(pkt) { pkt.state = PlayerState.Idle; this_.ui.addPlayer(pkt); },
         see_player: function(pkt) { this_.ui.addPlayer(pkt); },
         disconnect: function(pkt) { log('disconnected by server'); },
         see_disappear: function(pkt) { this_.ui.removePlayer(pkt.id); },
         see_begin_move: function(pkt)
         {
-            pkt.state = 1;
+            pkt.state = PlayerState.MovingOut;
             var player = this_.ui.find(pkt.id);
             this_.ui.setState(player, pkt);
         },
         see_cross_cell: movePlayer,
         see_stop: function(pkt)
         {
-            pkt.state = 0;
+            pkt.state = PlayerState.Idle;
             var player = this_.ui.find(pkt.id);
             this_.ui.setState(player, pkt);
         },
@@ -92,11 +95,9 @@ var connection = (function()
 
     this_.requestMove = function(dirStr)
     {
-        var str2dir = {right: 0, up: 1, left: 2, down: 3};
+        if (!(dirStr in Dir)) { log_error('invalid direction: ' + dirStr); return; }
 
-        if (!(dirStr in str2dir)) { log_error('invalid direction: ' + dirStr); return; }
-
-        send('move ' + str2dir[dirStr]);
+        send('move ' + Dir[dirStr]);
     };
 
     this_.disconnect = function()
