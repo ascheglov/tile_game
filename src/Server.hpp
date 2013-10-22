@@ -7,16 +7,17 @@
 
 #include "Game.hpp"
 
-#include <websocket-cpp/ServerImpl.hpp>
+#include <websocket-cpp/Server.hpp>
+#include <websocket-cpp/server_src.hpp>
 
 struct Connection : EventHandler
 {
-    Connection(websocket::ConnectionId id, websocket::ServerImpl& srv)
+    Connection(websocket::ConnectionId id, websocket::Server& srv)
         : m_connId{id}, m_server{&srv} 
     {}
 
     websocket::ConnectionId m_connId;
-    websocket::ServerImpl* m_server;
+    websocket::Server* m_server;
     ObjectId m_objId{0};
 
     struct Packet
@@ -36,7 +37,7 @@ struct Connection : EventHandler
         void send(Connection* conn)
         {
             ss << '}';
-            conn->m_server->send(conn->m_connId, ss.str(), false);
+            conn->m_server->sendText(conn->m_connId, ss.str());
         }
     };
 
@@ -100,7 +101,7 @@ struct Connection : EventHandler
 
 struct Server
 {
-    std::unique_ptr<websocket::ServerImpl> m_wsServer;
+    websocket::Server m_wsServer;
     Game m_game;
 
     std::unordered_map<websocket::ConnectionId, std::unique_ptr<Connection>> m_conn;
@@ -113,24 +114,7 @@ struct Server
         spawns.emplace_back(3, 3);
         m_game.setSpawns(spawns);
 
-        m_wsServer = std::make_unique<websocket::ServerImpl>(
-            "127.0.0.1", 4080, std::cout,
-            [this](websocket::Event event, websocket::ConnectionId id, std::string msg){
-                switch (event)
-                {
-                case websocket::Event::NewConnection:
-                    onNewConnection(id);
-                    break;
-
-                case websocket::Event::Message:
-                    onMessage(id, msg);
-                    break;
-
-                case websocket::Event::Disconnect:
-                    onDisconnect(id);
-                    break;
-                }
-            });
+        m_wsServer.start("127.0.0.1", 4080, std::cout);
     }
 
     void run()
@@ -139,19 +123,45 @@ struct Server
 
         for (;;)
         {
+            pollConnections();
             m_game.tick();
-            if (!poll_input())
+            if (!pollInput())
                 break;
 
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
 
         std::cout << "stopping...\n";
-        m_wsServer->stop();
+        m_wsServer.stop();
     }
 
 private:
-    bool poll_input()
+    void pollConnections()
+    {
+        websocket::Event event;
+        websocket::ConnectionId id;
+        std::string msg;
+
+        while (m_wsServer.poll(event, id, msg))
+        {
+            switch (event)
+            {
+            case websocket::Event::NewConnection:
+                onNewConnection(id);
+                break;
+
+            case websocket::Event::Message:
+                onMessage(id, msg);
+                break;
+
+            case websocket::Event::Disconnect:
+                onDisconnect(id);
+                break;
+            }
+        }
+    }
+
+    bool pollInput()
     {
         if (!_kbhit())
             return true;
@@ -189,7 +199,7 @@ p - list players
     void onNewConnection(websocket::ConnectionId connId)
     {
         assert(m_conn.count(connId) == 0);
-        m_conn[connId] = std::make_unique<Connection>(connId, *m_wsServer);
+        m_conn[connId] = std::make_unique<Connection>(connId, m_wsServer);
         m_game.newPlayer(*m_conn[connId]);
     }
 
