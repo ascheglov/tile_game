@@ -108,12 +108,6 @@ struct Server
 
     void start()
     {
-        std::vector<Point> spawns;
-        spawns.emplace_back(1, 1);
-        spawns.emplace_back(2, 2);
-        spawns.emplace_back(3, 3);
-        m_game.setSpawns(spawns);
-
         m_wsServer.start("127.0.0.1", 4080, std::cout);
     }
 
@@ -200,7 +194,8 @@ p - list players
     {
         assert(m_conn.count(connId) == 0);
         m_conn[connId] = std::make_unique<Connection>(connId, m_wsServer);
-        m_game.newPlayer(*m_conn[connId]);
+        Point pos{(int)connId % m_game.m_cfg.worldCX, (int)connId % m_game.m_cfg.worldCY};
+        m_game.newPlayer(*m_conn[connId], pos);
     }
 
     void onMessage(websocket::ConnectionId connId, const std::string& msg)

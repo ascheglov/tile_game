@@ -8,9 +8,8 @@
 TEST_CASE("move alone", "[game]")
 {
     Game game;
-    game.setSpawns({{3, 2}});
 
-    TestClient A(game);
+    TestClient A(game, {3, 2});
     REQUIRE(A.m_state == PlayerState::Idle);
 
     A.requestMove(Dir::Right);
@@ -31,10 +30,9 @@ TEST_CASE("move alone", "[game]")
 TEST_CASE("observe move", "[game]")
 {
     Game game;
-    game.setSpawns({{3, 2}, {3, 3}});
 
-    TestClient A(game);
-    TestClient B(game);
+    TestClient A(game, {3, 2});
+    TestClient B(game, {3, 3});
 
     A.requestMove(Dir::Right);
 
@@ -54,13 +52,12 @@ TEST_CASE("observe move", "[game]")
 TEST_CASE("spawn and see move out", "[game]")
 {
     Game game;
-    game.setSpawns({{3, 2}, {3, 3}});
 
-    TestClient A(game);
+    TestClient A(game, {3, 2});
 
     A.requestMove(Dir::Right);
 
-    TestClient B(game);
+    TestClient B(game, {3, 3});
 
     REQUIRE(B.see[1].m_state == PlayerState::MovingOut);
     REQUIRE(B.see[1].m_moveDir == Dir::Right);
@@ -69,14 +66,13 @@ TEST_CASE("spawn and see move out", "[game]")
 TEST_CASE("spawn and see move in", "[game]")
 {
     Game game;
-    game.setSpawns({{3, 2}, {3, 3}});
 
-    TestClient A(game);
+    TestClient A(game, {3, 2});
 
     A.requestMove(Dir::Right);
     game.tick();
 
-    TestClient B(game);
+    TestClient B(game, {3, 3});
 
     REQUIRE(B.see[1].m_state == PlayerState::MovingIn);
     REQUIRE(B.see[1].m_moveDir == Dir::Right);
@@ -86,25 +82,23 @@ TEST_CASE("spawn and see move in", "[game]")
 TEST_CASE("spawn after move and see idle", "[game]")
 {
     Game game;
-    game.setSpawns({{3, 2}, {3, 3}});
 
-    TestClient A(game);
+    TestClient A(game, {3, 2});
 
     A.requestMove(Dir::Right);
     game.tick();
     game.tick();
 
-    TestClient B(game);
+    TestClient B(game, {3, 3});
     REQUIRE(B.see[1].m_state == PlayerState::Idle);
 }
 
 TEST_CASE("move out of view area", "[game]")
 {
     Game game;
-    game.setSpawns({{3, 2}, {1, 2}});
 
-    TestClient A(game);
-    TestClient B(game);
+    TestClient A(game, {3, 2});
+    TestClient B(game, {1, 2});
 
     REQUIRE_FALSE(A.see.empty());
     REQUIRE_FALSE(B.see.empty());
@@ -123,10 +117,9 @@ TEST_CASE("move out of view area", "[game]")
 TEST_CASE("move into view area", "[game]")
 {
     Game game;
-    game.setSpawns({{4, 2}, {1, 2}});
 
-    TestClient A(game);
-    TestClient B(game);
+    TestClient A(game, {4, 2});
+    TestClient B(game, {1, 2});
 
     REQUIRE(A.see.empty());
     REQUIRE(B.see.empty());
@@ -150,10 +143,9 @@ TEST_CASE("move into view area", "[game]")
 TEST_CASE("move not in view area", "[game]")
 {
     Game game;
-    game.setSpawns({{1, 1}, {5, 5}});
 
-    TestClient A(game);
-    TestClient B(game);
+    TestClient A(game, {1, 1});
+    TestClient B(game, {5, 5});
 
     REQUIRE(B.see.empty());
     A.requestMove(Dir::Right);
@@ -165,15 +157,14 @@ TEST_CASE("move not in view area", "[game]")
 TEST_CASE("move across world boundaries", "[game]")
 {
     Game game;
-    game.setSpawns({{0, 0}, {7, 7}});
 
-    TestClient A(game);
+    TestClient A(game, {0, 0});
     A.requestMove(Dir::Left);
     REQUIRE(A.m_state == PlayerState::Idle);
     A.requestMove(Dir::Up);
     REQUIRE(A.m_state == PlayerState::Idle);
 
-    TestClient B(game);
+    TestClient B(game, {7, 7});
     B.requestMove(Dir::Right);
     REQUIRE(B.m_state == PlayerState::Idle);
     B.requestMove(Dir::Down);
@@ -183,8 +174,8 @@ TEST_CASE("move across world boundaries", "[game]")
 TEST_CASE("ignore move request when moving", "[game]")
 {
     Game game;
-    game.setSpawns({{1, 1}});
-    TestClient A(game);
+
+    TestClient A(game, {1, 1});
     A.requestMove(Dir::Right);
     REQUIRE(A.m_state == PlayerState::MovingOut);
     REQUIRE(A.m_moveDir == Dir::Right);

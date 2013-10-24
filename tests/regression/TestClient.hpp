@@ -13,9 +13,9 @@ struct TestClient : EventHandler, FullPlayerInfo
 
     std::unordered_map<ObjectId, FullPlayerInfo> see;
 
-    TestClient(Game& game) : m_game{&game}
+    TestClient(Game& game, Point pos) : m_game{&game}
     {
-        game.newPlayer(*this);
+        game.newPlayer(*this, pos);
     }
 
     void requestDisconnect()

@@ -8,9 +8,8 @@
 TEST_CASE("spawn one", "[game]")
 {
     Game game;
-    game.setSpawns({{3, 2}});
 
-    TestClient A(game);
+    TestClient A(game, {3, 2});
 
     REQUIRE(A.m_id == 1);
     REQUIRE(A.m_pos == Point(3, 2));
@@ -20,10 +19,9 @@ TEST_CASE("spawn one", "[game]")
 TEST_CASE("spawn two nearby", "[game]")
 {
     Game game;
-    game.setSpawns({{3, 1}, {3, 2}});
 
-    TestClient A(game);
-    TestClient B(game);
+    TestClient A(game, {3, 1});
+    TestClient B(game, {3, 2});
 
     REQUIRE(B.m_id == 2);
     REQUIRE(B.m_pos == Point(3, 2));
@@ -35,10 +33,9 @@ TEST_CASE("spawn two nearby", "[game]")
 TEST_CASE("spawn two apart", "[game]")
 {
     Game game;
-    game.setSpawns({{0, 0}, {7, 7}});
 
-    TestClient A(game);
-    TestClient B(game);
+    TestClient A(game, {0, 0});
+    TestClient B(game, {7, 7});
 
     REQUIRE(A.see.empty());
     REQUIRE(B.see.empty());

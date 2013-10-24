@@ -11,23 +11,6 @@
 #include "math.hpp"
 #include "Object.hpp"
 
-struct SpawnPoints
-{
-    void set(std::vector<Point> spawns) { m_spawns = std::move(spawns); }
-
-    Point get()
-    {
-        assert(!m_spawns.empty());
-        auto pt = m_spawns[m_next];
-        m_next = (m_next + 1) % m_spawns.size();
-        return pt;
-    }
-
-private:
-    std::vector<Point> m_spawns;
-    unsigned m_next{0};
-};
-
 class ObjectManager
 {
 public:
@@ -121,20 +104,12 @@ class Game
 public:
     GameCfg m_cfg;
 
-    void setSpawns(std::vector<Point> spawns)
-    {
-        for (auto&& pt : spawns)
-            assert(pt.inside(m_cfg.worldCX, m_cfg.worldCY));
-
-        m_spawns.set(std::move(spawns));
-    }
-
-    void newPlayer(EventHandler& eventHandler)
+    void newPlayer(EventHandler& eventHandler, Point pos)
     {
         auto&& obj = m_objects.newObject();
         obj.m_eventHandler = &eventHandler;
 
-        obj.m_pos = m_spawns.get();
+        obj.m_pos = pos;
      
         obj.m_eventHandler->init(obj.m_id, obj.m_pos);
 
@@ -279,6 +254,5 @@ public:
     }
 
     ObjectManager m_objects;
-    SpawnPoints m_spawns;
     TimerQueue m_timers;
 };
