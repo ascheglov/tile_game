@@ -220,3 +220,17 @@ TEST_CASE("two move to same cell", "[game]")
     B.requestMove(Dir::Left);
     REQUIRE(B.m_state == PlayerState::MovingOut);
 }
+
+TEST_CASE("move after another", "[game]")
+{
+    Game game;
+
+    TestClient A{game, {1, 1}};
+    TestClient B{game, {2, 1}};
+
+    B.requestMove(Dir::Right);
+    game.tick();
+    
+    A.requestMove(Dir::Right);
+    REQUIRE(A.m_state == PlayerState::MovingOut);
+}
