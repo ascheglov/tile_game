@@ -99,6 +99,58 @@ struct GameCfg
     int moveTicks{1};
 };
 
+class World
+{
+public:
+    explicit World(unsigned cx, unsigned cy)
+        : m_cx(cx), m_cy(cy)
+    {
+        m_objectTable.resize(m_cy);
+        for (auto& v : m_objectTable)
+            v.resize(cx, '0');
+    }
+
+    ObjectId objectAt(const Point& pt) const
+    {
+        return isValidPoint(pt) ? at(pt) - '0' : 0;
+    }
+
+    void addObject(ObjectId id, const Point& pt)
+    {
+        assert(objectAt(pt) == 0);
+        assert(id < 50); // otherwise it won't fit in `char`
+        at(pt) = static_cast<char>('0' + id);
+    }
+
+    void removeObject(const Point& pt)
+    {
+        assert(objectAt(pt) != 0);
+        at(pt) = '0';
+    }
+
+private:
+
+    bool isValidPoint(const Point& pt) const
+    {
+        return pt.inside(m_cx, m_cy);
+    }
+
+    char& at(const Point& pt)
+    {
+        assert(isValidPoint(pt));
+        return m_objectTable[pt.y][pt.x];
+    }
+
+    char at(const Point& pt) const
+    {
+        assert(isValidPoint(pt));
+        return m_objectTable[pt.y][pt.x];
+    }
+
+    int m_cx, m_cy;
+    std::vector<std::string> m_objectTable;
+};
+
 class Game
 {
 public:
@@ -112,6 +164,9 @@ public:
         obj.m_pos = pos;
      
         obj.m_eventHandler->init(obj.m_id, obj.m_pos);
+
+        assert(m_world.objectAt(pos) == 0);
+        m_world.addObject(obj.m_id, obj.m_pos);
 
         auto&& newPlayerInfo = obj.getFullInfo();
 
@@ -139,6 +194,9 @@ public:
             }
         });
         
+        assert(m_world.objectAt(obj.m_pos) == obj.m_id);
+        m_world.removeObject(obj.m_pos);
+
         m_objects.remove(obj.m_id);
     }
 
@@ -177,6 +235,9 @@ public:
         assert(obj.m_state == PlayerState::MovingOut);
         obj.m_state = PlayerState::MovingIn;
         moveRel(obj.m_pos, obj.m_moveDir);
+
+        m_world.removeObject(oldPos);
+        m_world.addObject(obj.m_id, obj.m_pos);
 
         m_timers.add(obj.m_id, m_cfg.moveTicks, [this](Object& o){ onStopMove(o); });
 
@@ -246,13 +307,13 @@ public:
 
     Object* objectAt(const Point& pt)
     {
-        for (auto&& objPair : m_objects.m_objects)
-            if (objPair.second->m_pos == pt)
-                return objPair.second.get();
+        if (auto id = m_world.objectAt(pt))
+            return &m_objects.getObject(id);
 
         return nullptr;
     }
 
     ObjectManager m_objects;
     TimerQueue m_timers;
+    World m_world{m_cfg.worldCX, m_cfg.worldCY};
 };
