@@ -13,6 +13,9 @@
     <Filter Include="tests\unit">
       <UniqueIdentifier>{45046024-0dc5-43e0-8c69-94891d84afcf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\server">
+      <UniqueIdentifier>{87930143-34c3-4990-bb8c-ba2dfa0c304a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\tests\catch_wrap.hpp">
@@ -42,8 +45,17 @@
     <ClInclude Include="..\..\..\tests\unit\TestCanvas.hpp">
       <Filter>tests\unit</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\Server.hpp">
-      <Filter>src</Filter>
+    <ClInclude Include="..\..\..\src\server\Connection.hpp">
+      <Filter>src\server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\server\Server.hpp">
+      <Filter>src\server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\server\PacketBuilder.hpp">
+      <Filter>src\server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\server\Menu.hpp">
+      <Filter>src\server</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

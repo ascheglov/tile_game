@@ -104,7 +104,10 @@ exit 0</Command>
     <ClInclude Include="..\..\..\src\Game.hpp" />
     <ClInclude Include="..\..\..\src\math.hpp" />
     <ClInclude Include="..\..\..\src\Object.hpp" />
-    <ClInclude Include="..\..\..\src\Server.hpp" />
+    <ClInclude Include="..\..\..\src\server\Connection.hpp" />
+    <ClInclude Include="..\..\..\src\server\Menu.hpp" />
+    <ClInclude Include="..\..\..\src\server\PacketBuilder.hpp" />
+    <ClInclude Include="..\..\..\src\server\Server.hpp" />
     <ClInclude Include="..\..\..\src\types.hpp" />
     <ClInclude Include="..\..\..\tests\catch_wrap.hpp" />
     <ClInclude Include="..\..\..\tests\regression\TestClient.hpp" />
