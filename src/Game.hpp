@@ -158,6 +158,11 @@ public:
 
     void newPlayer(EventHandler& eventHandler, Point pos)
     {
+        if (auto occupantId = m_world.objectAt(pos))
+        {
+            disconnect(m_objects.getObject(occupantId));
+        }
+
         auto&& obj = m_objects.newObject();
         obj.m_eventHandler = &eventHandler;
 

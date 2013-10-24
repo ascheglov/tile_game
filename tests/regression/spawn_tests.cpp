@@ -40,3 +40,16 @@ TEST_CASE("spawn two apart", "[game]")
     REQUIRE(A.see.empty());
     REQUIRE(B.see.empty());
 }
+
+TEST_CASE("spawn on occupied cell", "[game]")
+{
+    Game game;
+
+    TestClient A{game, {1, 1}};
+    TestClient B{game, {2, 1}};
+    REQUIRE(B.see.count(1) == 1);
+
+    TestClient C{game, {1, 1}};
+    REQUIRE(B.see.count(1) == 0);
+    REQUIRE(B.see.count(3) == 1);
+}
