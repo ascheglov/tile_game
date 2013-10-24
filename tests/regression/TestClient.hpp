@@ -77,7 +77,7 @@ private: // EventHandler implementation
     {
         auto& localInfo = findInfo(id);
         localInfo.m_state = PlayerState::MovingIn;
-        moveRel(localInfo.m_pos, localInfo.m_moveDir);
+        localInfo.m_pos = moveRel(localInfo.m_pos, localInfo.m_moveDir);
     }
 
     virtual void seeStop(ObjectId id) override

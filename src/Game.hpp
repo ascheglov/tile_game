@@ -112,43 +112,74 @@ public:
 
     ObjectId objectAt(const Point& pt) const
     {
-        return isValidPoint(pt) ? at(pt) - '0' : 0;
+        return isValidPoint(pt) ? getAt(pt) : 0;
     }
 
     void addObject(ObjectId id, const Point& pt)
     {
+        assert(isValidPoint(pt));
         assert(objectAt(pt) == 0);
-        assert(id < 50); // otherwise it won't fit in `char`
-        at(pt) = static_cast<char>('0' + id);
+        assert(realId(id) < 10); // otherwise it won't fit in [1; 9]
+        setAt(pt, id);
     }
 
     void removeObject(const Point& pt)
     {
         assert(objectAt(pt) != 0);
-        at(pt) = '0';
+        setAt(pt, 0);
+    }
+
+    void lockCell(ObjectId lockOwner, const Point& pt)
+    {
+        addObject(lockOwner | CellLockFlag, pt);
+    }
+
+    void moveToCell(const Point& from, const Point& dest)
+    {
+        assert(isLocked(dest));
+        auto id = objectAt(from);
+        assert(id == realId(objectAt(dest)));
+        removeObject(from);
+        removeObject(dest);
+        addObject(id, dest);
     }
 
 private:
+    static const ObjectId CellLockFlag = 0x80000000;
+
+    static ObjectId realId(ObjectId maskedId)
+    {
+        return maskedId & ~CellLockFlag;
+    }
+
+    bool isLocked(const Point& pt)
+    {
+        return (objectAt(pt) & CellLockFlag) != 0;
+    }
 
     bool isValidPoint(const Point& pt) const
     {
         return pt.inside(m_cx, m_cy);
     }
 
-    char& at(const Point& pt)
+    void setAt(const Point& pt, ObjectId id)
     {
         assert(isValidPoint(pt));
-        return m_objectTable[pt.y][pt.x];
+        if ((id & CellLockFlag) == 0)
+            m_objectTable[pt.y][pt.x] = wchar_t(id + '0');
+        else
+            m_objectTable[pt.y][pt.x] = wchar_t(id - 1 + L'\x2460');
     }
 
-    char at(const Point& pt) const
+    ObjectId getAt(const Point& pt) const
     {
         assert(isValidPoint(pt));
-        return m_objectTable[pt.y][pt.x];
+        auto ch = m_objectTable[pt.y][pt.x];
+        return (ch < 0x100) ? (ch - '0') : ((ch - 0x2460 + 1) | CellLockFlag);
     }
 
     int m_cx, m_cy;
-    std::vector<std::string> m_objectTable;
+    std::vector<std::wstring> m_objectTable;
 };
 
 class Game
@@ -202,14 +233,16 @@ public:
         assert(m_world.objectAt(obj.m_pos) == obj.m_id);
         m_world.removeObject(obj.m_pos);
 
+        if (obj.m_state == PlayerState::MovingOut)
+        {
+            m_world.removeObject(moveRel(obj.m_pos, obj.m_moveDir));
+        }
+
         m_objects.remove(obj.m_id);
     }
 
-    bool canMove(Object& obj, Dir direction)
+    bool canMoveTo(const Point& pt)
     {
-        auto pt = obj.m_pos;
-        moveRel(pt, direction);
-
         if (!pt.inside(m_cfg.worldCX, m_cfg.worldCY))
             return false;
              
@@ -224,8 +257,11 @@ public:
         if (obj.m_state != PlayerState::Idle)
             return;
 
-        if (!canMove(obj, direction))
+        auto destPoint = moveRel(obj.m_pos, direction);
+        if (!canMoveTo(destPoint))
             return;
+
+        m_world.lockCell(obj.m_id, destPoint);
 
         obj.m_state = PlayerState::MovingOut;
         obj.m_moveDir = direction;
@@ -246,10 +282,9 @@ public:
 
         assert(obj.m_state == PlayerState::MovingOut);
         obj.m_state = PlayerState::MovingIn;
-        moveRel(obj.m_pos, obj.m_moveDir);
+        obj.m_pos = moveRel(obj.m_pos, obj.m_moveDir);
 
-        m_world.removeObject(oldPos);
-        m_world.addObject(obj.m_id, obj.m_pos);
+        m_world.moveToCell(oldPos, obj.m_pos);
 
         m_timers.add(obj.m_id, m_cfg.moveTicks, [this](Object& o){ onStopMove(o); });
 

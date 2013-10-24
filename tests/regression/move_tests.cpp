@@ -202,3 +202,21 @@ TEST_CASE("move to occupied cell", "[game]")
     A.requestMove(Dir::Right);
     REQUIRE(A.m_state == PlayerState::Idle);
 }
+
+TEST_CASE("two move to same cell", "[game]")
+{
+    Game game;
+
+    TestClient A{game, {1, 1}};
+    TestClient B{game, {3, 1}};
+
+    A.requestMove(Dir::Right);
+    REQUIRE(A.m_state == PlayerState::MovingOut);
+
+    B.requestMove(Dir::Left);
+    REQUIRE(B.m_state == PlayerState::Idle);
+
+    A.requestDisconnect();
+    B.requestMove(Dir::Left);
+    REQUIRE(B.m_state == PlayerState::MovingOut);
+}

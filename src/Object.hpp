@@ -16,6 +16,13 @@ struct Object
 
     EventHandler* m_eventHandler{nullptr};
 
+    Point moveDest() const
+    {
+        auto pt = m_pos;
+        moveRel(pt, m_moveDir);
+        return pt;
+    }
+
     FullPlayerInfo getFullInfo() const
     {
         FullPlayerInfo inf;

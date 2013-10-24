@@ -51,31 +51,32 @@ inline Dir rightDir(Dir direction)
     return static_cast<Dir>((dirIdx - 1) % DirCount);
 }
 
-inline void moveRel(Point& pt, Dir dir, int distance = 1)
+inline Point moveRel(const Point& pt, Dir dir, int distance = 1)
 {
     int ofsX[] {1, 0, -1, 0};
     int ofsY[] {0, -1, 0, 1};
-    pt.x += ofsX[(int)dir] * distance;
-    pt.y += ofsY[(int)dir] * distance;
+    auto moved = pt;
+    moved.x += ofsX[(int)dir] * distance;
+    moved.y += ofsY[(int)dir] * distance;
+    return moved;
 }
 
 template<typename Callback>
 void forArc180(const Point& origin, int radius, Dir dir, Callback&& callback)
 {
-    auto pt = origin;
-    moveRel(pt, leftDir(dir), radius);
+    auto pt = moveRel(origin, leftDir(dir), radius);;    
     for (auto n = 0; n < radius; ++n)
     {
         callback(pt);
-        moveRel(pt, dir);
-        moveRel(pt, rightDir(dir));
+        pt = moveRel(pt, dir);
+        pt = moveRel(pt, rightDir(dir));
     }
 
     for (auto n = 0; n < radius + 1; ++n)
     {
         callback(pt);
-        moveRel(pt, oppositeDir(dir));
-        moveRel(pt, rightDir(dir));
+        pt = moveRel(pt, oppositeDir(dir));
+        pt = moveRel(pt, rightDir(dir));
     }
 }
 

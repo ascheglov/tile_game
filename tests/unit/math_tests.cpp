@@ -30,11 +30,10 @@ TEST_CASE("distance", "[math]")
 TEST_CASE("move", "[math]")
 {
     Point pt{1, 11};
-    auto moved = [=](Dir d){ auto newPt = pt; moveRel(newPt, d); return newPt; };
-    CHECK(moved(Dir::Right) == Point(2, 11));
-    CHECK(moved(Dir::Up) == Point(1, 10));
-    CHECK(moved(Dir::Left) == Point(0, 11));
-    CHECK(moved(Dir::Down) == Point(1, 12));
+    CHECK(moveRel(pt, Dir::Right) == Point(2, 11));
+    CHECK(moveRel(pt, Dir::Up) == Point(1, 10));
+    CHECK(moveRel(pt, Dir::Left) == Point(0, 11));
+    CHECK(moveRel(pt, Dir::Down) == Point(1, 12));
 }
 
 TEST_CASE("arc180", "[math]")
