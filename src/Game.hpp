@@ -209,7 +209,14 @@ public:
     {
         auto pt = obj.m_pos;
         moveRel(pt, direction);
-        return pt.inside(m_cfg.worldCX, m_cfg.worldCY);
+
+        if (!pt.inside(m_cfg.worldCX, m_cfg.worldCY))
+            return false;
+             
+        if (m_world.objectAt(pt) != 0)
+            return false;
+
+        return true;
     }
 
     void beginMove(Object& obj, Dir direction)

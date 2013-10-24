@@ -191,3 +191,14 @@ TEST_CASE("ignore move request when moving", "[game]")
     REQUIRE(A.m_state == PlayerState::MovingIn);
     REQUIRE(A.m_moveDir == Dir::Right);
 }
+
+TEST_CASE("move to occupied cell", "[game]")
+{
+    Game game;
+
+    TestClient A{game, {1, 1}};
+    TestClient B{game, {2, 1}};
+
+    A.requestMove(Dir::Right);
+    REQUIRE(A.m_state == PlayerState::Idle);
+}
