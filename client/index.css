@@ -18,6 +18,11 @@ table#view td.v
     border: 1px solid black;
 }
 
+table#view td.wall
+{
+    background: LightBlue;
+}
+
 #menu>button
 {
     float: left;

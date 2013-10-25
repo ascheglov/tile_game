@@ -8,8 +8,19 @@
 
 static void serverMain()
 {
+    auto worldMap =
+        "........" // 0
+        ".?WWWW.."
+        "..?..W.."
+        "..W?...."
+        "...W?..." // 4
+        ".....?.."
+        "......?."
+        "........"
+        ;
+
     GameCfg cfg;
-    Server srv{cfg};
+    Server srv{cfg, worldMap};
     srv.start("127.0.0.1", 4080, std::cout);
     std::cout << "Press [q] to quit or [h] for help\n";
     

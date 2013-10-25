@@ -16,6 +16,12 @@ public:
         return *this;
     }
 
+    PacketBuilder& field(const char* name, const std::string& value)
+    {
+        ss << ",\"" << name << "\":\"" << value << '"';
+        return *this;
+    }
+
     std::string close()
     {
         ss << '}';

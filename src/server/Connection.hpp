@@ -14,6 +14,14 @@ public:
 
     ObjectId objId() const { return m_objId; }
 
+    void sendWorldMap(int cx, const std::string& worldMap)
+    {
+        PacketBuilder p("map");
+        p.field("cx", cx);
+        p.field("cells", worldMap);
+        send(p);
+    }
+
 private:
     void send(PacketBuilder& pb)
     {

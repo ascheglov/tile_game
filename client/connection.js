@@ -54,6 +54,7 @@ var connection = (function()
 
     var messageHandlers =
     {
+        map: function(pkt) { this_.ui.setMap(pkt); },
         init: function(pkt)
         {
             pkt.state = PlayerState.Idle;

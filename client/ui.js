@@ -71,6 +71,30 @@ var ui = (function()
         }
     };
 
+    this_.setMap = function(info)
+    {
+        var cx = info.cx;
+        var cy = info.cells.length / cx;
+        var view = $('#view');
+        view.empty();
+        
+        var idx = 0;
+        for (var y = 0; y != cy; y++)
+        {
+            var row = $('<tr>');
+            for (var x = 0; x != cx; x++, idx++)
+            {
+                var cell = $('<td>');
+                switch (info.cells[idx])
+                {
+                case 'W': cell.addClass('wall'); break;
+                }
+                row.append(cell);
+            }
+            view.append(row);
+        }
+    };
+    
     return this_;
 })();
 
