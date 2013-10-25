@@ -3,11 +3,12 @@
 #include "catch_wrap.hpp"
 #include "test_printers.hpp"
 
+#include "test_game_config.hpp"
 #include "TestClient.hpp"
 
 TEST_CASE("spawn one", "[game]")
 {
-    Game game;
+    Game game{TestGameCfg};
 
     TestClient A(game, {3, 2});
 
@@ -18,7 +19,7 @@ TEST_CASE("spawn one", "[game]")
 
 TEST_CASE("spawn two nearby", "[game]")
 {
-    Game game;
+    Game game{TestGameCfg};
 
     TestClient A(game, {3, 1});
     TestClient B(game, {3, 2});
@@ -32,7 +33,7 @@ TEST_CASE("spawn two nearby", "[game]")
 
 TEST_CASE("spawn two apart", "[game]")
 {
-    Game game;
+    Game game{TestGameCfg};
 
     TestClient A(game, {0, 0});
     TestClient B(game, {7, 7});
@@ -43,7 +44,7 @@ TEST_CASE("spawn two apart", "[game]")
 
 TEST_CASE("spawn on occupied cell", "[game]")
 {
-    Game game;
+    Game game{TestGameCfg};
 
     TestClient A{game, {1, 1}};
     TestClient B{game, {2, 1}};

@@ -102,6 +102,7 @@ exit 0</Command>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\events.hpp" />
     <ClInclude Include="..\..\..\src\Game.hpp" />
+    <ClInclude Include="..\..\..\src\GameCfg.hpp" />
     <ClInclude Include="..\..\..\src\math.hpp" />
     <ClInclude Include="..\..\..\src\Object.hpp" />
     <ClInclude Include="..\..\..\src\server\Connection.hpp" />
@@ -111,6 +112,7 @@ exit 0</Command>
     <ClInclude Include="..\..\..\src\types.hpp" />
     <ClInclude Include="..\..\..\tests\catch_wrap.hpp" />
     <ClInclude Include="..\..\..\tests\regression\TestClient.hpp" />
+    <ClInclude Include="..\..\..\tests\regression\test_game_config.hpp" />
     <ClInclude Include="..\..\..\tests\test_printers.hpp" />
     <ClInclude Include="..\..\..\tests\unit\TestCanvas.hpp" />
   </ItemGroup>

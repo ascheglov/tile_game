@@ -3,11 +3,12 @@
 #include "catch_wrap.hpp"
 #include "test_printers.hpp"
 
+#include "test_game_config.hpp"
 #include "TestClient.hpp"
 
 TEST_CASE("disconnect single client", "[game]")
 {
-    Game game;
+    Game game{TestGameCfg};
 
     TestClient A(game, {3, 2});
     REQUIRE(A.m_isConnected);
@@ -18,7 +19,7 @@ TEST_CASE("disconnect single client", "[game]")
 
 TEST_CASE("see other disconnects", "[game]")
 {
-    Game game;
+    Game game{TestGameCfg};
 
     TestClient A(game, {1, 1});
     TestClient B(game, {2, 2});
@@ -30,7 +31,7 @@ TEST_CASE("see other disconnects", "[game]")
 
 TEST_CASE("other disconnects far away", "[game]")
 {
-    Game game;
+    Game game{TestGameCfg};
 
     TestClient A(game, {1, 1});
     TestClient B(game, {7, 7});

@@ -6,6 +6,7 @@
 #include <memory>
 #include <unordered_map>
 
+#include "GameCfg.hpp"
 #include "types.hpp"
 #include "events.hpp"
 #include "math.hpp"
@@ -89,14 +90,6 @@ struct TimerQueue
     };
 
     std::list<Timer> m_queue;
-};
-
-struct GameCfg
-{
-    int worldCX{8};
-    int worldCY{8};
-    int playerViewRadius{2};
-    int moveTicks{1};
 };
 
 struct Geodata
@@ -223,7 +216,12 @@ private:
 class Game
 {
 public:
-    GameCfg m_cfg;
+    Game(const GameCfg& cfg) : m_cfg{cfg} {}
+
+    Game(const Game&) = delete;
+    void operator=(const Game&) = delete;
+
+    const GameCfg& m_cfg;
 
     void newPlayer(EventHandler& eventHandler, Point pos)
     {

@@ -57,6 +57,12 @@
     <ClInclude Include="..\..\..\src\server\Menu.hpp">
       <Filter>src\server</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\tests\regression\test_game_config.hpp">
+      <Filter>tests\regression</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\GameCfg.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\tests\tests_main.cpp">

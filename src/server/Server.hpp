@@ -13,6 +13,8 @@
 class Server
 {
 public:
+    Server(const GameCfg& cfg) : m_game{cfg} {}
+
     void start(const std::string& ip, unsigned short port, std::ostream& log)
     {
         m_wsServer.start(ip, port, log);

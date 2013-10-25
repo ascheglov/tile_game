@@ -3,11 +3,12 @@
 #include "catch_wrap.hpp"
 #include "test_printers.hpp"
 
+#include "test_game_config.hpp"
 #include "TestClient.hpp"
 
 TEST_CASE("move alone", "[game]")
 {
-    Game game;
+    Game game{TestGameCfg};
 
     TestClient A(game, {3, 2});
     REQUIRE(A.m_state == PlayerState::Idle);
@@ -29,7 +30,7 @@ TEST_CASE("move alone", "[game]")
 
 TEST_CASE("observe move", "[game]")
 {
-    Game game;
+    Game game{TestGameCfg};
 
     TestClient A(game, {3, 2});
     TestClient B(game, {3, 3});
@@ -51,7 +52,7 @@ TEST_CASE("observe move", "[game]")
 
 TEST_CASE("spawn and see move out", "[game]")
 {
-    Game game;
+    Game game{TestGameCfg};
 
     TestClient A(game, {3, 2});
 
@@ -65,7 +66,7 @@ TEST_CASE("spawn and see move out", "[game]")
 
 TEST_CASE("spawn and see move in", "[game]")
 {
-    Game game;
+    Game game{TestGameCfg};
 
     TestClient A(game, {3, 2});
 
@@ -81,7 +82,7 @@ TEST_CASE("spawn and see move in", "[game]")
 
 TEST_CASE("spawn after move and see idle", "[game]")
 {
-    Game game;
+    Game game{TestGameCfg};
 
     TestClient A(game, {3, 2});
 
@@ -95,7 +96,7 @@ TEST_CASE("spawn after move and see idle", "[game]")
 
 TEST_CASE("move out of view area", "[game]")
 {
-    Game game;
+    Game game{TestGameCfg};
 
     TestClient A(game, {3, 2});
     TestClient B(game, {1, 2});
@@ -116,7 +117,7 @@ TEST_CASE("move out of view area", "[game]")
 
 TEST_CASE("move into view area", "[game]")
 {
-    Game game;
+    Game game{TestGameCfg};
 
     TestClient A(game, {4, 2});
     TestClient B(game, {1, 2});
@@ -142,7 +143,7 @@ TEST_CASE("move into view area", "[game]")
 
 TEST_CASE("move not in view area", "[game]")
 {
-    Game game;
+    Game game{TestGameCfg};
 
     TestClient A(game, {1, 1});
     TestClient B(game, {5, 5});
@@ -156,7 +157,7 @@ TEST_CASE("move not in view area", "[game]")
 
 TEST_CASE("move across world boundaries", "[game]")
 {
-    Game game;
+    Game game{TestGameCfg};
 
     TestClient A(game, {0, 0});
     A.requestMove(Dir::Left);
@@ -173,7 +174,7 @@ TEST_CASE("move across world boundaries", "[game]")
 
 TEST_CASE("ignore move request when moving", "[game]")
 {
-    Game game;
+    Game game{TestGameCfg};
 
     TestClient A(game, {1, 1});
     A.requestMove(Dir::Right);
@@ -194,7 +195,7 @@ TEST_CASE("ignore move request when moving", "[game]")
 
 TEST_CASE("move to occupied cell", "[game]")
 {
-    Game game;
+    Game game{TestGameCfg};
 
     TestClient A{game, {1, 1}};
     TestClient B{game, {2, 1}};
@@ -205,7 +206,7 @@ TEST_CASE("move to occupied cell", "[game]")
 
 TEST_CASE("two move to same cell", "[game]")
 {
-    Game game;
+    Game game{TestGameCfg};
 
     TestClient A{game, {1, 1}};
     TestClient B{game, {3, 1}};
@@ -223,7 +224,7 @@ TEST_CASE("two move to same cell", "[game]")
 
 TEST_CASE("move after another", "[game]")
 {
-    Game game;
+    Game game{TestGameCfg};
 
     TestClient A{game, {1, 1}};
     TestClient B{game, {2, 1}};
@@ -237,7 +238,7 @@ TEST_CASE("move after another", "[game]")
 
 TEST_CASE("move near a wall", "[game]")
 {
-    Game game;
+    Game game{TestGameCfg};
     game.m_geodata.addWall({1, 1});
 
     auto&& testMove = [&](Point spawnPt, Dir moveDir) -> PlayerState

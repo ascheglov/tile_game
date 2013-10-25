@@ -8,7 +8,8 @@
 
 static void serverMain()
 {
-    Server srv;
+    GameCfg cfg;
+    Server srv{cfg};
     srv.start("127.0.0.1", 4080, std::cout);
     std::cout << "Press [q] to quit or [h] for help\n";
     
