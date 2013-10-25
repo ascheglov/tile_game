@@ -234,3 +234,31 @@ TEST_CASE("move after another", "[game]")
     A.requestMove(Dir::Right);
     REQUIRE(A.m_state == PlayerState::MovingOut);
 }
+
+TEST_CASE("move near a wall", "[game]")
+{
+    Game game;
+    game.m_geodata.addWall({1, 1});
+
+    auto&& testMove = [&](Point spawnPt, Dir moveDir) -> PlayerState
+    {
+        TestClient A{game, spawnPt};
+        A.requestMove(moveDir);
+        return A.m_state;
+    };
+
+    SECTION("move into wall at Right")
+    {
+        REQUIRE(testMove({0, 1}, Dir::Right) == PlayerState::Idle);
+    }
+
+    SECTION("move into wall at Down")
+    {
+        REQUIRE(testMove({1, 0}, Dir::Down) == PlayerState::Idle);
+    }
+
+    SECTION("move near wall")
+    {
+        REQUIRE(testMove({1, 0}, Dir::Right) == PlayerState::MovingOut);
+    }
+}

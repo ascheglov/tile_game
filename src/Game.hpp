@@ -99,6 +99,44 @@ struct GameCfg
     int moveTicks{1};
 };
 
+struct Geodata
+{
+    Geodata(int cx, int cy)
+        : m_table(cx * cy)
+        , m_cx{cx}
+        , m_cy{cy}
+    {}
+
+    void addWall(const Point& pt)
+    {
+        if (pt.x > 0) m_table[idx(moveRel(pt, Dir::Left))] |= dirMask(Dir::Right);
+        if (pt.y > 0) m_table[idx(moveRel(pt, Dir::Up))] |= dirMask(Dir::Down);
+        if (pt.x < m_cx - 1) m_table[idx(moveRel(pt, Dir::Right))] |= dirMask(Dir::Left);
+        if (pt.y < m_cy - 1) m_table[idx(moveRel(pt, Dir::Down))] |= dirMask(Dir::Up);
+    }
+
+    bool canMove(const Point& pt, Dir moveDir) const
+    {
+        assert(pt.inside(m_cx, m_cy));
+        auto cellInfo = m_table[idx(pt)];
+        return (cellInfo & dirMask(moveDir)) == 0;
+    }
+
+private:
+    int idx(const Point& pt) const
+    {
+        return pt.x + pt.y * m_cx;
+    }
+
+    static std::uint8_t dirMask(Dir direction)
+    {
+        return 1 << static_cast<int>(direction);
+    }
+
+    std::vector<std::uint8_t> m_table;
+    int m_cx, m_cy;
+};
+
 class World
 {
 public:
@@ -241,12 +279,17 @@ public:
         m_objects.remove(obj.m_id);
     }
 
-    bool canMoveTo(const Point& pt)
+    bool canMoveTo(const Point& srcPt, Dir moveDir)
     {
-        if (!pt.inside(m_cfg.worldCX, m_cfg.worldCY))
+        auto destPt = moveRel(srcPt, moveDir);
+
+        if (!destPt.inside(m_cfg.worldCX, m_cfg.worldCY))
             return false;
-             
-        if (m_world.objectAt(pt) != 0)
+
+        if (!m_geodata.canMove(srcPt, moveDir))
+            return false;
+
+        if (m_world.objectAt(destPt) != 0)
             return false;
 
         return true;
@@ -257,10 +300,10 @@ public:
         if (obj.m_state != PlayerState::Idle)
             return;
 
-        auto destPoint = moveRel(obj.m_pos, direction);
-        if (!canMoveTo(destPoint))
+        if (!canMoveTo(obj.m_pos, direction))
             return;
 
+        auto destPoint = moveRel(obj.m_pos, direction);
         m_world.lockCell(obj.m_id, destPoint);
 
         obj.m_state = PlayerState::MovingOut;
@@ -363,4 +406,5 @@ public:
     ObjectManager m_objects;
     TimerQueue m_timers;
     World m_world{m_cfg.worldCX, m_cfg.worldCY};
+    Geodata m_geodata{m_cfg.worldCX, m_cfg.worldCY};
 };
