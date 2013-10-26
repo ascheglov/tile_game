@@ -81,3 +81,29 @@ TEST_CASE("see nothing (lightning cast)", "[game]")
 
     REQUIRE(B.seeEffect({2, 2}) == Effect::None);
 }
+
+TEST_CASE("spawn and see cast", "[game]")
+{
+    Game game{TestGameCfg};
+
+    TestClient A{game, {1, 1}};
+    A.requestCast(Spell::Lightning, {2, 2});
+
+    TestClient B{game, {1, 2}};
+    REQUIRE(B.see[1].m_state == PlayerState::Casting);
+    REQUIRE(B.see[1].m_spell == Spell::Lightning);
+}
+
+TEST_CASE("spawn after cast and and see nothing", "[game]")
+{
+    Game game{TestGameCfg};
+
+    TestClient A{game, {1, 1}};
+    A.requestCast(Spell::Lightning, {2, 2});
+    game.tick();
+
+    TestClient B{game, {1, 2}};
+    REQUIRE(B.see[1].m_state == PlayerState::Idle);
+    REQUIRE(B.seeEffect({2, 2}) == Effect::None);
+    REQUIRE(A.seeEffect({2, 2}) == Effect::Lightning);
+}
