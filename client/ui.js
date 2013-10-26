@@ -45,8 +45,12 @@ var ui = (function()
     this_.setState = function(el, info)
     {
         el.attr('state', info.state);
+
         if ('dir' in info)
             el.attr('dir', info.dir);
+
+        if ('spell' in info)
+            el.attr('spell', info.spell);
     };
 
     this_.getAttr = function(el, name)
@@ -95,6 +99,34 @@ var ui = (function()
         }
     };
     
+    this_.healthChange = function(info)
+    {
+        $('#hp').text(info.hp);
+    };
+    
+    this_.addEffect = function(info)
+    {
+        var ofs = cellOffset(info.x, info.y);
+        var effect = $('<div/>');
+        effect.attr('effect', info.effect).appendTo('#effects');
+        effect.css('left', ofs.left).css('top', ofs.top);
+        setTimeout(function() { effect.remove(); }, 1000);
+    };
+    
+    this_.getTargetPos = function()
+    {
+        var td = $('#view td.target');
+        var x = td.index();
+        var y = td.closest('tr').index();
+        return x + ' ' + y;
+    };
+    
+    this_.setTargetCell = function(td)
+    {
+        $('#view td.target').removeClass('target');
+        td.addClass('target');
+    };
+    
     return this_;
 })();
 
@@ -130,5 +162,25 @@ $(document).ready(function()
         connection.requestMove($(this).attr('dir'));
     });
 
+    $("#btn-cast-lightning").click(function()
+    {
+        connection.requestCast(Spell.Lightning, ui.getTargetPos());
+    });
+
+    $("#btn-cast-self-heal").click(function()
+    {
+        connection.requestCast(Spell.SelfHeal, '');
+    });
+    
+    $("#view").on('click', 'td', function(e)
+    {
+        ui.setTargetCell($(this));
+    });
+
+    $("#players").on('click', 'div', function(e)
+    {
+        ui.setTargetCell($('#view tr:eq(' + $(this).attr('y') + ') td:eq(' + $(this).attr('x') + ')'));
+    });
+    
     ui.log('initialization finished');
 });

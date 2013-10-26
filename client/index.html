@@ -21,8 +21,10 @@
 </head>
 <body>
     <div id="view_wrap">
+    HP: <span id="hp"></span>
     <table id="view"></table>
     <div id="players"></div>
+    <div id="effects"></div>
     </div>
 
     <div id="control">
@@ -39,6 +41,9 @@
         <button class="btn-move" dir="Right">&#x02C3;</button>
         <button class="btn-move" dir="Up">&#x02C4;</button>
         <button class="btn-move" dir="Down">&#x02C5;</button>
+        &nbsp;
+        <button id="btn-cast-lightning">&#x26A1;</button>
+        <button id="btn-cast-self-heal">&#x271A;</button>
         <hr/>
         <button id="btn-clear-log">Clear log</button>
         <div id="log"></div>

@@ -1,5 +1,6 @@
 var Dir = {Right: 0, Up: 1, Left: 2, Down: 3};
-var PlayerState = {Idle: 0, MovingOut: 1, MovingIn: 2};
+var PlayerState = {Idle: 0, MovingOut: 1, MovingIn: 2, Casting: 3};
+var Spell = {Lightning: 0, SelfHeal: 1};
 
 var connection = (function()
 {
@@ -60,6 +61,7 @@ var connection = (function()
             pkt.state = PlayerState.Idle;
             this_.ui.moveView(pkt);
             this_.ui.addPlayer(pkt);
+            this_.ui.healthChange(pkt);
         },
         see_player: function(pkt) { this_.ui.addPlayer(pkt); },
         disconnect: function(pkt) { log('disconnected by server'); },
@@ -77,6 +79,20 @@ var connection = (function()
             var player = this_.ui.find(pkt.id);
             this_.ui.setState(player, pkt);
         },
+        see_cast: function(pkt)
+        {
+            pkt.state = PlayerState.Casting;
+            var player = this_.ui.find(pkt.id);
+            this_.ui.setState(player, pkt);
+        },
+        see_end_cast: function(pkt)
+        {
+            pkt.state = PlayerState.Idle;
+            var player = this_.ui.find(pkt.id);
+            this_.ui.setState(player, pkt);
+        },
+        see_effect: function(pkt) { this_.ui.addEffect(pkt); },
+        hp_change: function(pkt) { this_.ui.healthChange(pkt); },
     };
 
     this_.onMessage = function(msg)
@@ -105,6 +121,11 @@ var connection = (function()
         send('move ' + Dir[dirStr]);
     };
 
+    this_.requestCast = function(spell, pos)
+    {
+        send('cast ' + spell + ' ' + pos);
+    }
+    
     this_.disconnect = function()
     {
         websocket.close();

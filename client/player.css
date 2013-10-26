@@ -1,4 +1,5 @@
-#players > div
+#players > div,
+#effects > div
 {
     position: absolute;
     width: 32px;
@@ -17,3 +18,7 @@
 #players > div[state="2"][dir="1"] { background-image: url("img/player/move-in-up.png"); }
 #players > div[state="2"][dir="2"] { background-image: url("img/player/move-in-left.png"); }
 #players > div[state="2"][dir="3"] { background-image: url("img/player/move-in-down.png"); }
+#players > div[state="3"][spell="0"] { background-image: url("img/player/cast-lightning.png"); }
+#players > div[state="3"][spell="1"] { background-image: url("img/player/cast-self-heal.png"); }
+
+#effects > div[effect="1"] { background-image: url("img/effect/lightning.png"); }

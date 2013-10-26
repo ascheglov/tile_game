@@ -28,8 +28,8 @@ public:
 
     void tick()
     {
-        pollConnections();
         m_game.tick();
+        pollConnections();
     }
 
     void stop()
@@ -88,7 +88,13 @@ private:
             msgStream >> dir;
             m_game.beginMove(obj, static_cast<Dir>(dir));
         }
-        else if(verb == "close")
+        else if (verb == "cast")
+        {
+            int spell, x, y;
+            msgStream >> spell >> x >> y;
+            m_game.beginCast(obj, static_cast<Spell>(spell), {x, y});
+        }
+        else if (verb == "close")
         {
             m_game.disconnect(obj);
         }

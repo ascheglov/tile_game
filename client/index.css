@@ -23,6 +23,11 @@ table#view td.wall
     background: LightBlue;
 }
 
+table#view td.target
+{
+    border: 2px solid red;
+}
+
 #menu>button
 {
     float: left;
