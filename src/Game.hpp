@@ -42,8 +42,6 @@ private:
 
 struct TimerQueue
 {
-    using ticks_t = std::uint32_t;  // 1.36 years at 100 ticks per second
-
     ticks_t m_now{0};
 
     template<typename Callback>
@@ -373,6 +371,44 @@ public:
         {
             if (otherObj.m_eventHandler)
                 otherObj.m_eventHandler->seeStop(obj.m_id);
+        });
+    }
+
+    void beginCast(Object& obj, Spell spell, const Point& dest)
+    {
+        if (obj.m_state != PlayerState::Idle)
+            return;
+
+        obj.m_state = PlayerState::Casting;
+        obj.m_spell = spell;
+        obj.m_castDest = dest;
+
+        m_timers.add(obj.m_id, m_cfg.castTicks, [this](Object& o){ onEndCast(o); });
+
+        auto&& castInfo = obj.getCastInfo();
+        forObjectsAround(obj.m_pos, [&](Object& otherObj)
+        {
+            if (otherObj.m_eventHandler)
+                otherObj.m_eventHandler->seeBeginCast(castInfo);
+        });
+    }
+
+    void onEndCast(Object& obj)
+    {
+        assert(obj.m_state == PlayerState::Casting);
+        obj.m_state = PlayerState::Idle;
+
+        forObjectsAround(obj.m_pos, [&](Object& otherObj)
+        {
+            if (otherObj.m_eventHandler)
+                otherObj.m_eventHandler->seeEndCast(obj.m_id);
+        });
+
+        SpellEffect effect{obj.m_spell, obj.m_castDest};
+        forObjectsAround(effect.m_pos, [&](Object& otherObj)
+        {
+            if (otherObj.m_eventHandler)
+                otherObj.m_eventHandler->seeEffect(effect);
         });
     }
 

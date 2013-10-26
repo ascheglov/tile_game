@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstdlib>
+#include <functional>
 
 struct Point
 {
@@ -20,6 +21,18 @@ inline bool operator==(const Point& lhs, const Point& rhs)
 }
 
 inline bool operator!=(const Point& lhs, const Point& rhs) { return !(lhs == rhs); }
+
+namespace std
+{
+    template<>
+    struct hash<Point>
+    {
+        std::size_t operator()(const Point& pt) const
+        {
+            return static_cast<std::size_t>(pt.x ^ (pt.y << 16));
+        }
+    };
+}
 
 inline int distance(const Point& a, const Point& b)
 {

@@ -22,7 +22,23 @@ inline std::ostream& operator<<(std::ostream& o, Dir d)
 inline std::ostream& operator<<(std::ostream& o, PlayerState ps)
 {
     auto idx = static_cast<unsigned>(ps);
-    const char* table[] {"Idle", "MovingOut", "MovingIn"};
+    const char* table[] {"Idle", "MovingOut", "MovingIn", "Casting"};
+    o << (idx < _countof(table) ? table[idx] : "UNDEFINED");
+    return o;
+}
+
+inline std::ostream& operator<<(std::ostream& o, Spell s)
+{
+    auto idx = static_cast<unsigned>(s);
+    const char* table[] {"Lightning"};
+    o << (idx < _countof(table) ? table[idx] : "UNDEFINED");
+    return o;
+}
+
+inline std::ostream& operator<<(std::ostream& o, Effect e)
+{
+    auto idx = static_cast<unsigned>(e);
+    const char* table[] {"None", "Lightning"};
     o << (idx < _countof(table) ? table[idx] : "UNDEFINED");
     return o;
 }

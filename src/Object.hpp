@@ -14,6 +14,9 @@ struct Object
 
     Dir m_moveDir;
 
+    Spell m_spell;
+    Point m_castDest;
+
     EventHandler* m_eventHandler{nullptr};
 
     Point moveDest() const
@@ -30,12 +33,19 @@ struct Object
         inf.m_pos = m_pos;
         inf.m_state = m_state;
         inf.m_moveDir = m_moveDir;
+        inf.m_spell = m_spell;
         return inf;
     }
 
     MoveInfo getMoveInfo() const
     {
         MoveInfo inf = {m_id, m_moveDir};
+        return inf;
+    }
+
+    CastInfo getCastInfo() const
+    {
+        CastInfo inf = {m_id, m_spell};
         return inf;
     }
 };

@@ -80,5 +80,8 @@
     <ClCompile Include="..\..\..\tests\regression\move_tests.cpp">
       <Filter>tests\regression</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\tests\regression\cast_lightning_tests.cpp">
+      <Filter>tests\regression</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

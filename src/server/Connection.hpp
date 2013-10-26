@@ -85,6 +85,31 @@ private:
         send(p);
     }
 
+    virtual void seeBeginCast(const CastInfo& info) override
+    {
+        PacketBuilder p("see_cast");
+        p.field("id", info.m_id);
+        p.field("spell", static_cast<int>(info.m_spell));
+        send(p);
+    }
+
+    virtual void seeEndCast(ObjectId id) override
+    {
+        PacketBuilder p("see_end_cast");
+        p.field("id", id);
+        send(p);
+    }
+
+    virtual void seeEffect(const SpellEffect& effect) override
+    {
+        PacketBuilder p("see_effect");
+        p.field("x", effect.m_pos.x);
+        p.field("y", effect.m_pos.y);
+        p.field("effect", static_cast<int>(effect.m_effect));
+        send(p);
+    }
+
+
     websocket::ConnectionId m_connId;
     websocket::Server* m_server;
     ObjectId m_objId{0};

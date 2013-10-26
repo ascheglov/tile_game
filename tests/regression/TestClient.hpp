@@ -30,6 +30,23 @@ struct TestClient : EventHandler, FullPlayerInfo
         m_game->beginMove(obj, direction);
     }
 
+    void requestCast(Spell spell, const Point& dest)
+    {
+        auto& obj = m_game->m_objects.getObject(m_id);
+        m_game->beginCast(obj, spell, dest);
+    }
+
+    Effect seeEffect(Point pt)
+    {
+        dropExpiredEffects();
+        
+        auto it = m_effects.find(pt);
+        if (it == m_effects.end())
+            return Effect::None;
+
+        return it->second.first;
+    }
+
 private: // EventHandler implementation
     FullPlayerInfo& findInfo(ObjectId id)
     {
@@ -85,4 +102,39 @@ private: // EventHandler implementation
         auto& localInfo = findInfo(id);
         localInfo.m_state = PlayerState::Idle;
     }
+
+    virtual void seeBeginCast(const CastInfo& info) override
+    {
+        auto& localInfo = findInfo(info.m_id);
+        localInfo.m_state = PlayerState::Casting;
+        localInfo.m_spell = info.m_spell;
+    }
+
+    virtual void seeEndCast(ObjectId id) override
+    {
+        auto& localInfo = findInfo(id);
+        localInfo.m_state = PlayerState::Idle;
+    }
+
+    virtual void seeEffect(const SpellEffect& effect) override
+    {
+        dropExpiredEffects();
+        auto&& effectVal = std::make_pair(effect.m_effect, now() + 1);
+        m_effects.emplace(effect.m_pos, effectVal);
+    }
+
+    ticks_t now() const { return m_game->m_timers.m_now; }
+
+    void dropExpiredEffects()
+    {
+        decltype(m_effects) newEffects;
+        for (auto&& val : m_effects)
+        {
+            if (val.second.second > now())
+                newEffects.insert(val);
+        }
+        m_effects = newEffects;
+    }
+
+    std::unordered_map<Point, std::pair<Effect, ticks_t>> m_effects;
 };

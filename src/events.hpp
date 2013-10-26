@@ -9,12 +9,34 @@ struct FullPlayerInfo
     Point m_pos;
     PlayerState m_state;
     Dir m_moveDir;
+    Spell m_spell;
 };
 
 struct MoveInfo
 {
     ObjectId id;
     Dir moveDir;
+};
+
+struct CastInfo
+{
+    ObjectId m_id;
+    Spell m_spell;
+};
+
+struct SpellEffect
+{
+    SpellEffect(Spell spell, Point pos) : m_pos{pos}
+    {
+        switch (spell)
+        {
+        case Spell::Lightning: m_effect = Effect::Lightning; break;
+        default: assert(!"unknown spell");
+        }
+    }
+
+    Point m_pos;
+    Effect m_effect;
 };
 
 struct EventHandler
@@ -30,6 +52,10 @@ struct EventHandler
     virtual void seeCrossCellBorder(ObjectId id) = 0;
     virtual void seeStop(ObjectId id) = 0;
 
+    virtual void seeBeginCast(const CastInfo& info) = 0;
+    virtual void seeEndCast(ObjectId id) = 0;
+    
+    virtual void seeEffect(const SpellEffect& effect) = 0;
 protected:
     ~EventHandler() = default;
 };
