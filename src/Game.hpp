@@ -233,7 +233,7 @@ public:
 
         obj.m_pos = pos;
      
-        obj.m_eventHandler->init(obj.m_id, obj.m_pos);
+        obj.m_eventHandler->init(obj.m_id, obj.m_pos, obj.m_health);
 
         assert(m_world.objectAt(pos) == 0);
         m_world.addObject(obj.m_id, obj.m_pos);
@@ -404,12 +404,33 @@ public:
                 otherObj.m_eventHandler->seeEndCast(obj.m_id);
         });
 
+        if (auto victim = objectAt(obj.m_castDest))
+        {
+            damageObject(*victim, obj.m_spell);
+        }
+
         SpellEffect effect{obj.m_spell, obj.m_castDest};
         forObjectsAround(effect.m_pos, [&](Object& otherObj)
         {
             if (otherObj.m_eventHandler)
                 otherObj.m_eventHandler->seeEffect(effect);
         });
+    }
+
+    void damageObject(Object& obj, Spell spell)
+    {
+        auto spellIdx = static_cast<unsigned>(spell);
+        assert(spellIdx < m_cfg.spellDamage.size());
+        auto hpDelta = m_cfg.spellDamage[spellIdx];
+        if (obj.m_health > hpDelta)
+        {
+            obj.m_health -= hpDelta;
+            obj.m_eventHandler->healthChange(obj.m_health);
+        }
+        else
+        {
+            disconnect(obj);
+        }
     }
 
     template<typename Callback>

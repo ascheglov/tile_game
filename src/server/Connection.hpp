@@ -28,7 +28,7 @@ private:
         m_server->sendText(m_connId, pb.close());
     }
 
-    virtual void init(ObjectId assignedId, const Point& pos) override
+    virtual void init(ObjectId assignedId, const Point& pos, int health) override
     {
         m_objId = assignedId;
 
@@ -36,6 +36,7 @@ private:
         p.field("id", assignedId);
         p.field("x", pos.x);
         p.field("y", pos.y);
+        p.field("hp", health);
         send(p);
     }
 
@@ -109,6 +110,12 @@ private:
         send(p);
     }
 
+    virtual void healthChange(int newHP) override
+    {
+        PacketBuilder p("hp_change");
+        p.field("hp", newHP);
+        send(p);
+    }
 
     websocket::ConnectionId m_connId;
     websocket::Server* m_server;

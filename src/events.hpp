@@ -41,7 +41,7 @@ struct SpellEffect
 
 struct EventHandler
 {
-    virtual void init(ObjectId assignedId, const Point& pos) = 0;
+    virtual void init(ObjectId assignedId, const Point& pos, int health) = 0;
 
     virtual void seePlayer(const FullPlayerInfo& info) = 0;
 
@@ -56,6 +56,8 @@ struct EventHandler
     virtual void seeEndCast(ObjectId id) = 0;
     
     virtual void seeEffect(const SpellEffect& effect) = 0;
+
+    virtual void healthChange(int newHP) = 0;
 protected:
     ~EventHandler() = default;
 };

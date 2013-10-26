@@ -13,6 +13,8 @@ struct TestClient : EventHandler, FullPlayerInfo
 
     std::unordered_map<ObjectId, FullPlayerInfo> see;
 
+    int m_health;
+
     TestClient(Game& game, Point pos) : m_game{&game}
     {
         game.newPlayer(*this, pos);
@@ -55,12 +57,13 @@ private: // EventHandler implementation
         return see[id];
     }
 
-    virtual void init(ObjectId assignedId, const Point& pos) override
+    virtual void init(ObjectId assignedId, const Point& pos, int health) override
     {
         assert(!m_isConnected);
         m_isConnected = true;
         m_id = assignedId;
         m_pos = pos;
+        m_health = health;
         m_state = PlayerState::Idle;
     }
 
@@ -121,6 +124,11 @@ private: // EventHandler implementation
         dropExpiredEffects();
         auto&& effectVal = std::make_pair(effect.m_effect, now() + 1);
         m_effects.emplace(effect.m_pos, effectVal);
+    }
+
+    virtual void healthChange(int newHP) override
+    {
+        m_health = newHP;
     }
 
     ticks_t now() const { return m_game->m_timers.m_now; }

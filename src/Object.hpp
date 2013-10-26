@@ -17,6 +17,8 @@ struct Object
     Spell m_spell;
     Point m_castDest;
 
+    int m_health{100};
+
     EventHandler* m_eventHandler{nullptr};
 
     Point moveDest() const
