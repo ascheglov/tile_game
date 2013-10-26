@@ -30,7 +30,7 @@ inline std::ostream& operator<<(std::ostream& o, PlayerState ps)
 inline std::ostream& operator<<(std::ostream& o, Spell s)
 {
     auto idx = static_cast<unsigned>(s);
-    const char* table[] {"Lightning"};
+    const char* table[] {"Lightning", "SelfHeal"};
     o << (idx < _countof(table) ? table[idx] : "UNDEFINED");
     return o;
 }

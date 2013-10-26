@@ -122,6 +122,7 @@ exit 0</Command>
     <ClCompile Include="..\..\..\tests\regression\move_tests.cpp" />
     <ClCompile Include="..\..\..\tests\regression\spawn_tests.cpp" />
     <ClCompile Include="..\..\..\tests\regression\spell_harm_tests.cpp" />
+    <ClCompile Include="..\..\..\tests\regression\spell_heal_tests.cpp" />
     <ClCompile Include="..\..\..\tests\tests_main.cpp" />
     <ClCompile Include="..\..\..\tests\unit\math_tests.cpp" />
   </ItemGroup>

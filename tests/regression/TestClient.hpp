@@ -32,7 +32,7 @@ struct TestClient : EventHandler, FullPlayerInfo
         m_game->beginMove(obj, direction);
     }
 
-    void requestCast(Spell spell, const Point& dest)
+    void requestCast(Spell spell, Point dest = {})
     {
         auto& obj = m_game->m_objects.getObject(m_id);
         m_game->beginCast(obj, spell, dest);

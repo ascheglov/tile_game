@@ -13,7 +13,7 @@ enum class PlayerState
 
 enum class Spell
 {
-    Lightning,
+    Lightning, SelfHeal,
 };
 
 enum class Effect

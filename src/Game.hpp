@@ -404,12 +404,45 @@ public:
                 otherObj.m_eventHandler->seeEndCast(obj.m_id);
         });
 
-        if (auto victim = objectAt(obj.m_castDest))
+        switch (obj.m_spell)
         {
-            damageObject(*victim, obj.m_spell);
+        case Spell::Lightning:
+            castAtPoint(obj.m_spell, obj.m_castDest);
+            break;
+
+        case Spell::SelfHeal:
+            castSelfHeal(obj);
+            break;
+
+        default:
+            assert(!"unknown spell");
+        }
+    }
+
+    void castAtPoint(Spell spell, const Point& dest)
+    {
+        if (auto victim = objectAt(dest))
+        {
+            damageObject(*victim, spell);
         }
 
-        SpellEffect effect{obj.m_spell, obj.m_castDest};
+        SpellEffect effect{spell, dest};
+        createEffect(effect);
+    }
+
+    void castSelfHeal(Object& obj)
+    {
+        auto spellIdx = static_cast<unsigned>(Spell::SelfHeal);
+        assert(spellIdx < m_cfg.spellHpDelta.size());
+        auto hpDelta = m_cfg.spellHpDelta[spellIdx];
+        obj.m_health += hpDelta;
+        if (obj.m_health > 100)
+            obj.m_health = 100;
+        obj.m_eventHandler->healthChange(obj.m_health);
+    }
+
+    void createEffect(const SpellEffect& effect)
+    {
         forObjectsAround(effect.m_pos, [&](Object& otherObj)
         {
             if (otherObj.m_eventHandler)
@@ -420,11 +453,11 @@ public:
     void damageObject(Object& obj, Spell spell)
     {
         auto spellIdx = static_cast<unsigned>(spell);
-        assert(spellIdx < m_cfg.spellDamage.size());
-        auto hpDelta = m_cfg.spellDamage[spellIdx];
-        if (obj.m_health > hpDelta)
+        assert(spellIdx < m_cfg.spellHpDelta.size());
+        auto hpDelta = m_cfg.spellHpDelta[spellIdx];
+        if (obj.m_health > -hpDelta)
         {
-            obj.m_health -= hpDelta;
+            obj.m_health += hpDelta;
             obj.m_eventHandler->healthChange(obj.m_health);
         }
         else

@@ -86,5 +86,8 @@
     <ClCompile Include="..\..\..\tests\regression\spell_harm_tests.cpp">
       <Filter>tests\regression</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\tests\regression\spell_heal_tests.cpp">
+      <Filter>tests\regression</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
