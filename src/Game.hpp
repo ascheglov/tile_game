@@ -34,6 +34,12 @@ public:
         m_objects.erase(id);
     }
 
+    Object* findObject(ObjectId id)
+    {
+        auto it = m_objects.find(id);
+        return it == m_objects.end() ? nullptr : it->second.get();
+    }
+
     std::unordered_map<ObjectId, std::unique_ptr<Object>> m_objects;
 
 private:

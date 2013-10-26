@@ -107,7 +107,8 @@ private:
     void onDisconnect(websocket::ConnectionId connId)
     {
         if (auto objId = m_conn[connId]->objId())
-            m_game.disconnect(m_game.m_objects.getObject(objId));
+            if (auto objPtr = m_game.m_objects.findObject(objId))
+                m_game.disconnect(*objPtr);
 
         m_conn.erase(connId);
     }

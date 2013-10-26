@@ -55,6 +55,7 @@ private:
     {
         PacketBuilder p("disconnect");
         send(p);
+        m_server->drop(m_connId);
     }
 
     virtual void seeDisappear(ObjectId id) override
