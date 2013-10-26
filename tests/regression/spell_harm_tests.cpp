@@ -18,10 +18,12 @@ TEST_CASE("hit with lightning", "[game]")
 
     A.requestCast(Spell::Lightning, {2, 2});
     game.tick();
+    game.tick();
 
     REQUIRE(B.m_health < 100);
 
     A.requestCast(Spell::Lightning, {2, 2});
+    game.tick();
     game.tick();
 
     REQUIRE_FALSE(B.m_isConnected);

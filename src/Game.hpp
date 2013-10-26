@@ -18,7 +18,7 @@ public:
     Object& newObject()
     {
         ++m_lastObjectId;
-        m_objects[m_lastObjectId] = std::make_unique<Object>(m_lastObjectId);
+        m_objects[m_lastObjectId] = std::make_shared<Object>(m_lastObjectId);
         return *m_objects[m_lastObjectId];
     }
 
@@ -28,19 +28,13 @@ public:
         return *m_objects[id];
     }
 
-    void remove(ObjectId id)
-    {
-        assert(m_objects.count(id) != 0);
-        m_objects.erase(id);
-    }
-
     Object* findObject(ObjectId id)
     {
         auto it = m_objects.find(id);
         return it == m_objects.end() ? nullptr : it->second.get();
     }
 
-    std::unordered_map<ObjectId, std::unique_ptr<Object>> m_objects;
+    std::unordered_map<ObjectId, std::shared_ptr<Object>> m_objects;
 
 private:
     ObjectId m_lastObjectId{0};
@@ -227,6 +221,14 @@ public:
 
     const GameCfg& m_cfg;
 
+    void tick()
+    {
+        auto&& id2obj = [this](ObjectId id) -> Object& { return m_objects.getObject(id); };
+        m_timers.tick(id2obj);
+
+        updateObjects();
+    }
+
     void newPlayer(EventHandler& eventHandler, Point pos)
     {
         if (auto occupantId = m_world.objectAt(pos))
@@ -257,7 +259,7 @@ public:
             }
         });
     }
-
+private:
     void disconnect(Object& obj)
     {
         obj.m_eventHandler->disconnect();
@@ -278,7 +280,7 @@ public:
             m_world.removeObject(moveRel(obj.m_pos, obj.m_moveDir));
         }
 
-        m_objects.remove(obj.m_id);
+        obj.m_erased = true;
     }
 
     bool canMoveTo(const Point& srcPt, Dir moveDir)
@@ -483,10 +485,45 @@ public:
         }
     }
 
-    void tick()
+    void updateObjects()
     {
-        auto&& id2obj = [this](ObjectId id) -> Object& { return m_objects.getObject(id); };
-        m_timers.tick(id2obj);
+        decltype(m_objects.m_objects) newTable;
+        for (auto&& objPair : m_objects.m_objects)
+        {
+            auto&& obj = *objPair.second;
+            if (!obj.m_nextAction.empty())
+            {
+                auto&& a = obj.m_nextAction;
+
+                switch (obj.m_nextAction.m_action)
+                {
+                case Action::Disconnect:
+                    disconnect(obj);
+                    break;
+
+                case Action::Move:
+                    beginMove(obj, a.m_moveDir);
+                    break;
+
+                case Action::Cast:
+                    beginCast(obj, a.m_spell, a.m_castDest);
+                    break;
+
+                case Action::None:
+                default:
+                    assert(!"unknown action");
+                }
+
+                obj.m_nextAction.clear();
+            }
+
+            if (!obj.m_erased)
+                newTable[obj.m_id] = objPair.second;
+            else
+                objPair.second.reset();
+        }
+
+        m_objects.m_objects.swap(newTable);
     }
 
     Object* objectAt(const Point& pt)
@@ -496,6 +533,8 @@ public:
 
         return nullptr;
     }
+
+public:
 
     ObjectManager m_objects;
     TimerQueue m_timers;

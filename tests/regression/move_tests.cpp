@@ -14,6 +14,7 @@ TEST_CASE("move alone", "[game]")
     REQUIRE(A.m_state == PlayerState::Idle);
 
     A.requestMove(Dir::Right);
+    game.tick();
 
     REQUIRE(A.m_state == PlayerState::MovingOut);
     REQUIRE(A.m_moveDir == Dir::Right);
@@ -36,6 +37,7 @@ TEST_CASE("observe move", "[game]")
     TestClient B(game, {3, 3});
 
     A.requestMove(Dir::Right);
+    game.tick();
 
     REQUIRE(B.see[1].m_state == PlayerState::MovingOut);
     REQUIRE(B.see[1].m_moveDir == Dir::Right);
@@ -57,6 +59,7 @@ TEST_CASE("spawn and see move out", "[game]")
     TestClient A(game, {3, 2});
 
     A.requestMove(Dir::Right);
+    game.tick();
 
     TestClient B(game, {3, 3});
 
@@ -71,6 +74,7 @@ TEST_CASE("spawn and see move in", "[game]")
     TestClient A(game, {3, 2});
 
     A.requestMove(Dir::Right);
+    game.tick();
     game.tick();
 
     TestClient B(game, {3, 3});
@@ -89,6 +93,7 @@ TEST_CASE("spawn after move and see idle", "[game]")
     A.requestMove(Dir::Right);
     game.tick();
     game.tick();
+    game.tick();
 
     TestClient B(game, {3, 3});
     REQUIRE(B.see[1].m_state == PlayerState::Idle);
@@ -105,6 +110,7 @@ TEST_CASE("move out of view area", "[game]")
     REQUIRE_FALSE(B.see.empty());
 
     A.requestMove(Dir::Right);
+    game.tick();
     game.tick();
 
     REQUIRE(A.see.empty());
@@ -126,6 +132,7 @@ TEST_CASE("move into view area", "[game]")
     REQUIRE(B.see.empty());
 
     A.requestMove(Dir::Left);
+    game.tick();
     game.tick();
 
     REQUIRE_FALSE(A.see.empty());
@@ -152,6 +159,7 @@ TEST_CASE("move not in view area", "[game]")
     A.requestMove(Dir::Right);
     game.tick();
     game.tick();
+    game.tick();
     REQUIRE(B.see.empty());
 }
 
@@ -161,14 +169,18 @@ TEST_CASE("move across world boundaries", "[game]")
 
     TestClient A(game, {0, 0});
     A.requestMove(Dir::Left);
+    game.tick();
     REQUIRE(A.m_state == PlayerState::Idle);
     A.requestMove(Dir::Up);
+    game.tick();
     REQUIRE(A.m_state == PlayerState::Idle);
 
     TestClient B(game, {7, 7});
     B.requestMove(Dir::Right);
+    game.tick();
     REQUIRE(B.m_state == PlayerState::Idle);
     B.requestMove(Dir::Down);
+    game.tick();
     REQUIRE(B.m_state == PlayerState::Idle);
 }
 
@@ -178,17 +190,10 @@ TEST_CASE("ignore move request when moving", "[game]")
 
     TestClient A(game, {1, 1});
     A.requestMove(Dir::Right);
-    REQUIRE(A.m_state == PlayerState::MovingOut);
-    REQUIRE(A.m_moveDir == Dir::Right);
-
-    A.requestMove(Dir::Left);
-    REQUIRE(A.m_state == PlayerState::MovingOut);
-    REQUIRE(A.m_moveDir == Dir::Right);
-
     game.tick();
-    REQUIRE(A.m_state == PlayerState::MovingIn);
 
     A.requestMove(Dir::Left);
+    game.tick();
     REQUIRE(A.m_state == PlayerState::MovingIn);
     REQUIRE(A.m_moveDir == Dir::Right);
 }
@@ -201,6 +206,7 @@ TEST_CASE("move to occupied cell", "[game]")
     TestClient B{game, {2, 1}};
 
     A.requestMove(Dir::Right);
+    game.tick();
     REQUIRE(A.m_state == PlayerState::Idle);
 }
 
@@ -212,13 +218,17 @@ TEST_CASE("two move to same cell", "[game]")
     TestClient B{game, {3, 1}};
 
     A.requestMove(Dir::Right);
+    game.tick();
     REQUIRE(A.m_state == PlayerState::MovingOut);
 
     B.requestMove(Dir::Left);
+    game.tick();
     REQUIRE(B.m_state == PlayerState::Idle);
 
     A.requestDisconnect();
+    game.tick();
     B.requestMove(Dir::Left);
+    game.tick();
     REQUIRE(B.m_state == PlayerState::MovingOut);
 }
 
@@ -231,8 +241,10 @@ TEST_CASE("move after another", "[game]")
 
     B.requestMove(Dir::Right);
     game.tick();
+    game.tick();
     
     A.requestMove(Dir::Right);
+    game.tick();
     REQUIRE(A.m_state == PlayerState::MovingOut);
 }
 
@@ -245,6 +257,7 @@ TEST_CASE("move near a wall", "[game]")
     {
         TestClient A{game, spawnPt};
         A.requestMove(moveDir);
+        game.tick();
         return A.m_state;
     };
 

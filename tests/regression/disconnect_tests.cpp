@@ -14,6 +14,7 @@ TEST_CASE("disconnect single client", "[game]")
     REQUIRE(A.m_isConnected);
 
     A.requestDisconnect();
+    game.tick();
     REQUIRE_FALSE(A.m_isConnected);
 }
 
@@ -26,6 +27,7 @@ TEST_CASE("see other disconnects", "[game]")
 
     REQUIRE_FALSE(A.see.empty());
     B.requestDisconnect();
+    game.tick();
     REQUIRE(A.see.empty());
 }
 
@@ -38,5 +40,6 @@ TEST_CASE("other disconnects far away", "[game]")
 
     REQUIRE(A.see.empty());
     B.requestDisconnect();
+    game.tick();
     REQUIRE(A.see.empty());
 }

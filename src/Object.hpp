@@ -4,6 +4,17 @@
 #include "events.hpp"
 #include "math.hpp"
 
+struct ActionData
+{
+    Action m_action{Action::None};
+    Dir m_moveDir;
+    Spell m_spell;
+    Point m_castDest;
+
+    bool empty() const { return m_action == Action::None; }
+    void clear() { m_action = Action::None; }
+};
+
 struct Object
 {
     Object(ObjectId id) : m_id{id} {}
@@ -19,7 +30,11 @@ struct Object
 
     int m_health{100};
 
+    ActionData m_nextAction;
+
     EventHandler* m_eventHandler{nullptr};
+
+    bool m_erased{false};
 
     Point moveDest() const
     {

@@ -15,21 +15,25 @@ TEST_CASE("self-heal", "[game]")
 
     A.requestCast(Spell::Lightning, {2, 2});
     game.tick();
+    game.tick();
 
     REQUIRE(B.m_health < 100);
     auto oldHealth = B.m_health;
 
     B.requestCast(Spell::SelfHeal);
     game.tick();
+    game.tick();
 
     REQUIRE(B.m_health > oldHealth);
 
     B.requestCast(Spell::SelfHeal);
     game.tick();
+    game.tick();
 
     REQUIRE(B.m_health == 100);
 
     B.requestCast(Spell::SelfHeal);
+    game.tick();
     game.tick();
 
     REQUIRE(B.m_health == 100);

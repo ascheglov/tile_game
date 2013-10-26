@@ -13,6 +13,7 @@ TEST_CASE("cast lightning", "[game]")
     TestClient A{game, {1, 1}};
     
     A.requestCast(Spell::Lightning, {2, 1});
+    game.tick();
 
     REQUIRE(A.m_state == PlayerState::Casting);
     REQUIRE(A.m_spell == Spell::Lightning);
@@ -36,6 +37,7 @@ TEST_CASE("observe cast lightning", "[game]")
     REQUIRE_FALSE(B.see.empty());
 
     A.requestCast(Spell::Lightning, {2, 1});
+    game.tick();
 
     REQUIRE(B.see[1].m_state == PlayerState::Casting);
     REQUIRE(B.see[1].m_spell == Spell::Lightning);
@@ -60,6 +62,7 @@ TEST_CASE("observe only cast effect (lightning)", "[game]")
     REQUIRE(B.see.empty());
     A.requestCast(Spell::Lightning, {2, 2});
     game.tick();
+    game.tick();
 
     REQUIRE(B.seeEffect({2, 2}) == Effect::Lightning);
 
@@ -78,6 +81,7 @@ TEST_CASE("see nothing (lightning cast)", "[game]")
     REQUIRE(B.see.empty());
     A.requestCast(Spell::Lightning, {2, 2});
     game.tick();
+    game.tick();
 
     REQUIRE(B.seeEffect({2, 2}) == Effect::None);
 }
@@ -88,6 +92,7 @@ TEST_CASE("spawn and see cast", "[game]")
 
     TestClient A{game, {1, 1}};
     A.requestCast(Spell::Lightning, {2, 2});
+    game.tick();
 
     TestClient B{game, {1, 2}};
     REQUIRE(B.see[1].m_state == PlayerState::Casting);
@@ -100,6 +105,7 @@ TEST_CASE("spawn after cast and and see nothing", "[game]")
 
     TestClient A{game, {1, 1}};
     A.requestCast(Spell::Lightning, {2, 2});
+    game.tick();
     game.tick();
 
     TestClient B{game, {1, 2}};

@@ -86,17 +86,22 @@ private:
         {
             int dir;
             msgStream >> dir;
-            m_game.beginMove(obj, static_cast<Dir>(dir));
+
+            obj.m_nextAction.m_action = Action::Move;
+            obj.m_nextAction.m_moveDir = static_cast<Dir>(dir);
         }
         else if (verb == "cast")
         {
             int spell, x, y;
             msgStream >> spell >> x >> y;
-            m_game.beginCast(obj, static_cast<Spell>(spell), {x, y});
+
+            obj.m_nextAction.m_action = Action::Cast;
+            obj.m_nextAction.m_spell = static_cast<Spell>(spell);
+            obj.m_nextAction.m_castDest = {x, y};
         }
         else if (verb == "close")
         {
-            m_game.disconnect(obj);
+            obj.m_nextAction.m_action = Action::Disconnect;
         }
         else
         {
@@ -108,7 +113,10 @@ private:
     {
         if (auto objId = m_conn[connId]->objId())
             if (auto objPtr = m_game.m_objects.findObject(objId))
-                m_game.disconnect(*objPtr);
+            {
+                objPtr->m_nextAction.m_action = Action::Disconnect;
+                return;
+            }
 
         m_conn.erase(connId);
     }

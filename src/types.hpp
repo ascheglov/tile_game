@@ -6,6 +6,11 @@ using ObjectId = std::uint32_t;
 
 using ticks_t = std::uint32_t;  // 1.36 years at 100 ticks per second
 
+enum class Action
+{
+    None, Move, Cast, Disconnect,
+};
+
 enum class PlayerState
 {
     Idle, MovingOut, MovingIn, Casting,

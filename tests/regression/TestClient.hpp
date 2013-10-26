@@ -22,20 +22,23 @@ struct TestClient : EventHandler, FullPlayerInfo
 
     void requestDisconnect()
     {
-        auto& obj = m_game->m_objects.getObject(m_id);
-        m_game->disconnect(obj);
+        auto&& ad = getActionData();
+        ad.m_action = Action::Disconnect;
     }
 
     void requestMove(Dir direction)
     {
-        auto& obj = m_game->m_objects.getObject(m_id);
-        m_game->beginMove(obj, direction);
+        auto&& ad = getActionData();
+        ad.m_action = Action::Move;
+        ad.m_moveDir = direction;
     }
 
     void requestCast(Spell spell, Point dest = {})
     {
-        auto& obj = m_game->m_objects.getObject(m_id);
-        m_game->beginCast(obj, spell, dest);
+        auto&& ad = getActionData();
+        ad.m_action = Action::Cast;
+        ad.m_spell = spell;
+        ad.m_castDest = dest;
     }
 
     Effect seeEffect(Point pt)
@@ -49,7 +52,14 @@ struct TestClient : EventHandler, FullPlayerInfo
         return it->second.first;
     }
 
-private: // EventHandler implementation
+private:
+    ActionData& getActionData()
+    {
+        auto& obj = m_game->m_objects.getObject(m_id);
+        assert(obj.m_nextAction.m_action == Action::None);
+        return obj.m_nextAction;
+    }
+
     FullPlayerInfo& findInfo(ObjectId id)
     {
         if (id == m_id) return *this;
