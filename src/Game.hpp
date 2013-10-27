@@ -220,6 +220,9 @@ public:
     void operator=(const Game&) = delete;
 
     const GameCfg& m_cfg;
+    Geodata m_geodata{m_cfg.worldCX, m_cfg.worldCY};
+
+    ticks_t now() const { return m_timers.m_now; }
 
     void tick()
     {
@@ -227,6 +230,12 @@ public:
         m_timers.tick(id2obj);
 
         updateObjects();
+    }
+
+    void enqueueAction(ObjectId id, ActionData action)
+    {
+        if (auto objPtr = m_objects.findObject(id))
+            objPtr->m_nextAction = action;
     }
 
     void newPlayer(EventHandler& eventHandler, Point pos)
@@ -485,6 +494,28 @@ private:
         }
     }
 
+    void dispatchAction(Object& obj, const ActionData& a)
+    {
+        switch (a.m_action)
+        {
+        case Action::Disconnect:
+            disconnect(obj);
+            break;
+
+        case Action::Move:
+            beginMove(obj, a.m_moveDir);
+            break;
+
+        case Action::Cast:
+            beginCast(obj, a.m_spell, a.m_castDest);
+            break;
+
+        case Action::None:
+        default:
+            assert(!"unknown action");
+        }
+    }
+
     void updateObjects()
     {
         decltype(m_objects.m_objects) newTable;
@@ -493,27 +524,7 @@ private:
             auto&& obj = *objPair.second;
             if (!obj.m_nextAction.empty())
             {
-                auto&& a = obj.m_nextAction;
-
-                switch (obj.m_nextAction.m_action)
-                {
-                case Action::Disconnect:
-                    disconnect(obj);
-                    break;
-
-                case Action::Move:
-                    beginMove(obj, a.m_moveDir);
-                    break;
-
-                case Action::Cast:
-                    beginCast(obj, a.m_spell, a.m_castDest);
-                    break;
-
-                case Action::None:
-                default:
-                    assert(!"unknown action");
-                }
-
+                dispatchAction(obj, obj.m_nextAction);
                 obj.m_nextAction.clear();
             }
 
@@ -534,10 +545,7 @@ private:
         return nullptr;
     }
 
-public:
-
     ObjectManager m_objects;
     TimerQueue m_timers;
     World m_world{m_cfg.worldCX, m_cfg.worldCY};
-    Geodata m_geodata{m_cfg.worldCX, m_cfg.worldCY};
 };

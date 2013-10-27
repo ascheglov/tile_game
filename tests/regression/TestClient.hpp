@@ -22,23 +22,26 @@ struct TestClient : EventHandler, FullPlayerInfo
 
     void requestDisconnect()
     {
-        auto&& ad = getActionData();
+        ActionData ad;
         ad.m_action = Action::Disconnect;
+        m_game->enqueueAction(m_id, ad);
     }
 
     void requestMove(Dir direction)
     {
-        auto&& ad = getActionData();
+        ActionData ad;
         ad.m_action = Action::Move;
         ad.m_moveDir = direction;
+        m_game->enqueueAction(m_id, ad);
     }
 
     void requestCast(Spell spell, Point dest = {})
     {
-        auto&& ad = getActionData();
+        ActionData ad;
         ad.m_action = Action::Cast;
         ad.m_spell = spell;
         ad.m_castDest = dest;
+        m_game->enqueueAction(m_id, ad);
     }
 
     Effect seeEffect(Point pt)
@@ -53,13 +56,6 @@ struct TestClient : EventHandler, FullPlayerInfo
     }
 
 private:
-    ActionData& getActionData()
-    {
-        auto& obj = m_game->m_objects.getObject(m_id);
-        assert(obj.m_nextAction.m_action == Action::None);
-        return obj.m_nextAction;
-    }
-
     FullPlayerInfo& findInfo(ObjectId id)
     {
         if (id == m_id) return *this;
@@ -141,7 +137,7 @@ private:
         m_health = newHP;
     }
 
-    ticks_t now() const { return m_game->m_timers.m_now; }
+    ticks_t now() const { return m_game->now(); }
 
     void dropExpiredEffects()
     {

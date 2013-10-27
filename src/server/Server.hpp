@@ -78,7 +78,8 @@ private:
     {
         auto objId = m_conn[connId]->objId();
         assert(objId != 0);
-        auto&& obj = m_game.m_objects.getObject(objId);
+
+        ActionData actionData;
 
         std::stringstream msgStream(msg);
         std::string verb; msgStream >> verb;
@@ -87,36 +88,40 @@ private:
             int dir;
             msgStream >> dir;
 
-            obj.m_nextAction.m_action = Action::Move;
-            obj.m_nextAction.m_moveDir = static_cast<Dir>(dir);
+            actionData.m_action = Action::Move;
+            actionData.m_moveDir = static_cast<Dir>(dir);
         }
         else if (verb == "cast")
         {
             int spell, x, y;
             msgStream >> spell >> x >> y;
 
-            obj.m_nextAction.m_action = Action::Cast;
-            obj.m_nextAction.m_spell = static_cast<Spell>(spell);
-            obj.m_nextAction.m_castDest = {x, y};
+            actionData.m_action = Action::Cast;
+            actionData.m_spell = static_cast<Spell>(spell);
+            actionData.m_castDest = {x, y};
         }
         else if (verb == "close")
         {
-            obj.m_nextAction.m_action = Action::Disconnect;
+            actionData.m_action = Action::Disconnect;
         }
         else
         {
             std::cout << "unknown packet: " << msg << '\n';
         }
+
+        if (!actionData.empty())
+            m_game.enqueueAction(objId, actionData);
     }
 
     void onDisconnect(websocket::ConnectionId connId)
     {
         if (auto objId = m_conn[connId]->objId())
-            if (auto objPtr = m_game.m_objects.findObject(objId))
-            {
-                objPtr->m_nextAction.m_action = Action::Disconnect;
-                return;
-            }
+        {
+            ActionData ad;
+            ad.m_action = Action::Disconnect;
+            m_game.enqueueAction(objId, ad);
+            return;
+        }
 
         m_conn.erase(connId);
     }
