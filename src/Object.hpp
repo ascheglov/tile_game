@@ -34,6 +34,9 @@ struct Object
 
     EventHandler* m_eventHandler{nullptr};
 
+    ticks_t m_timerDeadline;
+    std::function<void(Object&)> m_timerCallback;
+
     bool m_erased{false};
 
     Point moveDest() const

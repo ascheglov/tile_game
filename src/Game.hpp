@@ -40,56 +40,6 @@ private:
     ObjectId m_lastObjectId{0};
 };
 
-struct TimerQueue
-{
-    ticks_t m_now{0};
-
-    template<typename Callback>
-    void add(ObjectId id, unsigned delay, Callback&& callback)
-    {
-        m_queue.emplace_back(id, m_now + delay, callback);
-    }
-
-    template<typename Id2Obj>
-    void tick(Id2Obj&& id2obj)
-    {
-        ++m_now;
-        if (m_queue.empty())
-            return;
-
-        auto it = m_queue.begin();
-        auto next = it;
-        for (; it != m_queue.end(); it = next)
-        {
-            next = it; ++next;
-
-            if (it->elapsed(m_now))
-            {
-                it->callback(id2obj(it->id));
-                m_queue.erase(it);
-            }
-        }
-    }
-
-    struct Timer
-    {
-        template<typename Callback>
-        Timer(ObjectId id, ticks_t deadline, Callback&& callback)
-            : deadline(deadline)
-            , id(id)
-            , callback(std::forward<Callback>(callback))
-        {}
-
-        bool elapsed(ticks_t now) const { return now >= deadline; }
-
-        ticks_t deadline;
-        ObjectId id;
-        std::function<void(Object&)> callback;
-    };
-
-    std::list<Timer> m_queue;
-};
-
 struct Geodata
 {
     Geodata(int cx, int cy)
@@ -222,13 +172,11 @@ public:
     const GameCfg& m_cfg;
     Geodata m_geodata{m_cfg.worldCX, m_cfg.worldCY};
 
-    ticks_t now() const { return m_timers.m_now; }
+    ticks_t now() const { return m_now; }
 
     void tick()
     {
-        auto&& id2obj = [this](ObjectId id) -> Object& { return m_objects.getObject(id); };
-        m_timers.tick(id2obj);
-
+        ++m_now;
         updateObjects();
     }
 
@@ -322,7 +270,7 @@ private:
         obj.m_state = PlayerState::MovingOut;
         obj.m_moveDir = direction;
 
-        m_timers.add(obj.m_id, m_cfg.moveTicks, [this](Object& o){ onCrossCellBorder(o); });
+        setTimer(obj, m_cfg.moveTicks, [this](Object& o){ onCrossCellBorder(o); });
 
         auto&& moveInfo = obj.getMoveInfo();
         forObjectsAround(obj.m_pos, [&](Object& otherObj)
@@ -342,7 +290,7 @@ private:
 
         m_world.moveToCell(oldPos, obj.m_pos);
 
-        m_timers.add(obj.m_id, m_cfg.moveTicks, [this](Object& o){ onStopMove(o); });
+        setTimer(obj, m_cfg.moveTicks, [this](Object& o){ onStopMove(o); });
 
         auto&& fullInfo = obj.getFullInfo();
         forObjectsAround(obj.m_pos, [&](Object& otherObj)
@@ -400,7 +348,7 @@ private:
         obj.m_spell = spell;
         obj.m_castDest = dest;
 
-        m_timers.add(obj.m_id, m_cfg.castTicks, [this](Object& o){ onEndCast(o); });
+        setTimer(obj, m_cfg.castTicks, [this](Object& o){ onEndCast(o); });
 
         auto&& castInfo = obj.getCastInfo();
         forObjectsAround(obj.m_pos, [&](Object& otherObj)
@@ -528,6 +476,13 @@ private:
                 obj.m_nextAction.clear();
             }
 
+            if (!obj.m_erased && obj.m_timerCallback && now() >= obj.m_timerDeadline)
+            {
+                decltype(obj.m_timerCallback) callback;
+                callback.swap(obj.m_timerCallback);
+                callback(obj);
+            }
+
             if (!obj.m_erased)
                 newTable[obj.m_id] = objPair.second;
             else
@@ -545,7 +500,15 @@ private:
         return nullptr;
     }
 
+    template<typename Callback>
+    void setTimer(Object& obj, int delay, Callback&& callback)
+    {
+        assert(!obj.m_timerCallback);
+        obj.m_timerDeadline = now() + delay;
+        obj.m_timerCallback = std::forward<Callback>(callback);
+    }
+
     ObjectManager m_objects;
-    TimerQueue m_timers;
     World m_world{m_cfg.worldCX, m_cfg.worldCY};
+    ticks_t m_now{0};
 };
