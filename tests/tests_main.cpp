@@ -1,5 +1,4 @@
 #pragma warning(disable: 4913)
-#define _WIN32_WINNT 0x0601
 #include "server/Menu.hpp"
 #include "server/Server.hpp"
 

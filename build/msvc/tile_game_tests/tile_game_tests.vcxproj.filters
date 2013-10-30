@@ -63,6 +63,9 @@
     <ClInclude Include="..\..\..\src\GameCfg.hpp">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\build_config.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\tests\tests_main.cpp">
