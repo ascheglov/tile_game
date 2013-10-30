@@ -22,7 +22,7 @@ public:
         return *m_objects[m_lastObjectId];
     }
 
-    Object* findObject(ObjectId id)
+    ObjectAPI* findObject(ObjectId id)
     {
         auto it = m_objects.find(id);
         return it == m_objects.end() ? nullptr : it->second.get();
@@ -177,14 +177,15 @@ public:
     void enqueueAction(ObjectId id, ActionData action)
     {
         if (auto objPtr = m_objects.findObject(id))
-            objPtr->m_nextAction = action;
+            objPtr->setNextAction(action);
     }
 
     void newPlayer(EventHandler& eventHandler, Point pos)
     {
         if (auto objPtr = objectAt(pos))
         {
-            disconnect(*objPtr);
+            onDisconnect(objPtr->asObject());
+            objPtr->disconnect();
         }
 
         auto&& obj = m_objects.newObject();
@@ -211,7 +212,7 @@ public:
         });
     }
 private:
-    void disconnect(Object& obj)
+    void onDisconnect(const Object& obj)
     {
         obj.m_eventHandler->disconnect();
         
@@ -230,8 +231,6 @@ private:
         {
             m_world.removeObject(moveRel(obj.m_pos, obj.m_moveDir));
         }
-
-        obj.m_erased = true;
     }
 
     bool canMoveTo(const Point& srcPt, Dir moveDir)
@@ -409,11 +408,18 @@ private:
         });
     }
 
-    void damageObject(Object& obj, Spell spell)
+    void damageObject(ObjectAPI& obj, Spell spell)
     {
         auto spellIdx = static_cast<unsigned>(spell);
         assert(spellIdx < m_cfg.spellHpDelta.size());
         auto hpDelta = m_cfg.spellHpDelta[spellIdx];
+        obj.modifyHP(hpDelta);
+    }
+
+    void updateHealth(Object& obj)
+    {
+        int hpDelta = 0;
+        std::swap(hpDelta, obj.m_healthDelta);
         if (obj.m_health > -hpDelta)
         {
             obj.m_health += hpDelta;
@@ -421,7 +427,7 @@ private:
         }
         else
         {
-            disconnect(obj);
+            obj.m_erased = true;
         }
     }
 
@@ -441,7 +447,7 @@ private:
         switch (a.m_action)
         {
         case Action::Disconnect:
-            disconnect(obj);
+            obj.m_erased = true;
             break;
 
         case Action::Move:
@@ -470,23 +476,36 @@ private:
                 obj.m_nextAction.clear();
             }
 
-            if (!obj.m_erased && obj.m_timerCallback && now() >= obj.m_timerDeadline)
+            if (obj.m_timerCallback && now() >= obj.m_timerDeadline)
             {
                 decltype(obj.m_timerCallback) callback;
                 callback.swap(obj.m_timerCallback);
                 callback(obj);
             }
 
-            if (!obj.m_erased)
-                newTable[obj.m_id] = objPair.second;
-            else
-                objPair.second.reset();
+            newTable[obj.m_id] = objPair.second;
+        }
+
+        for (auto nextIter = begin(newTable), E = end(newTable); nextIter != E; )
+        {
+            auto currentIter = nextIter;
+            ++nextIter;
+            auto&& obj = *currentIter->second;
+            
+            if (obj.m_healthDelta)
+                updateHealth(obj);
+
+            if (obj.m_erased)
+            {
+                onDisconnect(obj);
+                newTable.erase(currentIter);
+            }
         }
 
         m_objects.m_objects.swap(newTable);
     }
 
-    Object* objectAt(const Point& pt)
+    ObjectAPI* objectAt(const Point& pt)
     {
         if (auto id = m_world.objectAt(pt))
         {

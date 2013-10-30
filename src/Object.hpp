@@ -4,6 +4,8 @@
 #include "events.hpp"
 #include "math.hpp"
 
+struct Object;
+
 struct ActionData
 {
     Action m_action{Action::None};
@@ -15,11 +17,28 @@ struct ActionData
     void clear() { m_action = Action::None; }
 };
 
-struct Object
+struct ObjectAPI
 {
-    Object(ObjectId id) : m_id{id} {}
+    ObjectAPI(ObjectId id) : m_id{id} {}
 
     ObjectId m_id;
+    EventHandler* m_eventHandler{nullptr};
+
+    virtual const Object& asObject() const = 0;
+
+    virtual void setNextAction(ActionData ad) = 0;
+    virtual void disconnect() = 0;
+
+    virtual void modifyHP(int delta) = 0;
+
+protected:
+    ~ObjectAPI() = default;
+};
+
+struct Object : public ObjectAPI
+{
+    Object(ObjectId id) : ObjectAPI{id} {}
+
     Point m_pos;
     PlayerState m_state{PlayerState::Idle};
 
@@ -32,12 +51,12 @@ struct Object
 
     ActionData m_nextAction;
 
-    EventHandler* m_eventHandler{nullptr};
-
     ticks_t m_timerDeadline;
     std::function<void(Object&)> m_timerCallback;
 
     bool m_erased{false};
+
+    int m_healthDelta{0};
 
     Point moveDest() const
     {
@@ -68,4 +87,16 @@ struct Object
         CastInfo inf = {m_id, m_spell};
         return inf;
     }
+
+private: // ObjectAPI implementation
+    virtual const Object& asObject() const override { return *this; }
+
+    virtual void setNextAction(ActionData ad) override
+    {
+        m_nextAction = std::move(ad);
+    }
+
+    virtual void disconnect() override { m_erased = true; }
+    
+    virtual void modifyHP(int delta) { m_healthDelta += delta; }
 };
