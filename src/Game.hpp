@@ -22,12 +22,6 @@ public:
         return *m_objects[m_lastObjectId];
     }
 
-    Object& getObject(ObjectId id)
-    {
-        assert(m_objects.count(id) != 0);
-        return *m_objects[id];
-    }
-
     Object* findObject(ObjectId id)
     {
         auto it = m_objects.find(id);
@@ -188,9 +182,9 @@ public:
 
     void newPlayer(EventHandler& eventHandler, Point pos)
     {
-        if (auto occupantId = m_world.objectAt(pos))
+        if (auto objPtr = objectAt(pos))
         {
-            disconnect(m_objects.getObject(occupantId));
+            disconnect(*objPtr);
         }
 
         auto&& obj = m_objects.newObject();
@@ -495,7 +489,11 @@ private:
     Object* objectAt(const Point& pt)
     {
         if (auto id = m_world.objectAt(pt))
-            return &m_objects.getObject(id);
+        {
+            auto objPtr = m_objects.findObject(id);
+            assert(objPtr && "inconsistent World data");
+            return objPtr;
+        }
 
         return nullptr;
     }
