@@ -4,6 +4,7 @@
 #include <functional>
 #include <list>
 #include <memory>
+#include <numeric>
 #include <unordered_map>
 
 #include "GameCfg.hpp"
@@ -29,6 +30,14 @@ public:
     }
 
     std::unordered_map<ObjectId, std::shared_ptr<Object>> m_objects;
+
+    template<typename F>
+    void parallel_for(unsigned threads, F&& f)
+    {
+        assert(threads == 1);
+        for (auto&& p : m_objects)
+            f(p.second, 0);
+    }
 
 private:
     ObjectId m_lastObjectId{0};
@@ -263,7 +272,7 @@ private:
         obj.m_state = PlayerState::MovingOut;
         obj.m_moveDir = direction;
 
-        setTimer(obj, m_cfg.moveTicks, [this](Object& o){ onCrossCellBorder(o); });
+        setTimer(obj, m_cfg.moveTicks, [this](Object& o, ThrdIdx){ onCrossCellBorder(o); });
 
         auto&& moveInfo = obj.getMoveInfo();
         forObjectsAround(obj.m_pos, [&](Object& otherObj)
@@ -283,7 +292,7 @@ private:
 
         m_world.moveToCell(oldPos, obj.m_pos);
 
-        setTimer(obj, m_cfg.moveTicks, [this](Object& o){ onStopMove(o); });
+        setTimer(obj, m_cfg.moveTicks, [this](Object& o, ThrdIdx){ onStopMove(o); });
 
         auto&& fullInfo = obj.getFullInfo();
         forObjectsAround(obj.m_pos, [&](Object& otherObj)
@@ -341,7 +350,8 @@ private:
         obj.m_spell = spell;
         obj.m_castDest = dest;
 
-        setTimer(obj, m_cfg.castTicks, [this](Object& o){ onEndCast(o); });
+        setTimer(obj, m_cfg.castTicks,
+            [this](Object& o, ThrdIdx threadIdx){ onEndCast(o, threadIdx); });
 
         auto&& castInfo = obj.getCastInfo();
         forObjectsAround(obj.m_pos, [&](Object& otherObj)
@@ -351,7 +361,7 @@ private:
         });
     }
 
-    void onEndCast(Object& obj)
+    void onEndCast(Object& obj, ThrdIdx threadIdx)
     {
         assert(obj.m_state == PlayerState::Casting);
         obj.m_state = PlayerState::Idle;
@@ -365,7 +375,7 @@ private:
         switch (obj.m_spell)
         {
         case Spell::Lightning:
-            castAtPoint(obj.m_spell, obj.m_castDest);
+            castAtPoint(obj.m_spell, obj.m_castDest, threadIdx);
             break;
 
         case Spell::SelfHeal:
@@ -377,11 +387,11 @@ private:
         }
     }
 
-    void castAtPoint(Spell spell, const Point& dest)
+    void castAtPoint(Spell spell, const Point& dest, ThrdIdx threadIdx)
     {
         if (auto victim = objectAt(dest))
         {
-            damageObject(*victim, spell);
+            damageObject(*victim, spell, threadIdx);
         }
 
         SpellEffect effect{spell, dest};
@@ -408,18 +418,20 @@ private:
         });
     }
 
-    void damageObject(ObjectAPI& obj, Spell spell)
+    void damageObject(ObjectAPI& obj, Spell spell, ThrdIdx threadIdx)
     {
         auto spellIdx = static_cast<unsigned>(spell);
         assert(spellIdx < m_cfg.spellHpDelta.size());
         auto hpDelta = m_cfg.spellHpDelta[spellIdx];
-        obj.modifyHP(hpDelta);
+        obj.modifyHP(hpDelta, threadIdx);
     }
 
     void updateHealth(Object& obj)
     {
-        int hpDelta = 0;
-        std::swap(hpDelta, obj.m_healthDelta);
+        auto&& arrFirst = begin(obj.m_healthDelta);
+        int hpDelta = std::accumulate(arrFirst, arrFirst + m_cfg.threadsCount, 0);
+        obj.m_healthDelta.fill(0);
+
         if (obj.m_health > -hpDelta)
         {
             obj.m_health += hpDelta;
@@ -467,9 +479,10 @@ private:
     void updateObjects()
     {
         decltype(m_objects.m_objects) newTable;
-        for (auto&& objPair : m_objects.m_objects)
+        m_objects.parallel_for(m_cfg.threadsCount, [&](const std::shared_ptr<Object>& objPtr, ThrdIdx threadIdx)
         {
-            auto&& obj = *objPair.second;
+            auto&& obj = *objPtr;
+
             if (!obj.m_nextAction.empty())
             {
                 dispatchAction(obj, obj.m_nextAction);
@@ -480,11 +493,11 @@ private:
             {
                 decltype(obj.m_timerCallback) callback;
                 callback.swap(obj.m_timerCallback);
-                callback(obj);
+                callback(obj, threadIdx);
             }
 
-            newTable[obj.m_id] = objPair.second;
-        }
+            newTable[obj.m_id] = objPtr;
+        });
 
         for (auto nextIter = begin(newTable), E = end(newTable); nextIter != E; )
         {
@@ -492,8 +505,7 @@ private:
             ++nextIter;
             auto&& obj = *currentIter->second;
             
-            if (obj.m_healthDelta)
-                updateHealth(obj);
+            updateHealth(obj);
 
             if (obj.m_erased)
             {

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 #include "types.hpp"
 #include "events.hpp"
 #include "math.hpp"
@@ -29,7 +31,7 @@ struct ObjectAPI
     virtual void setNextAction(ActionData ad) = 0;
     virtual void disconnect() = 0;
 
-    virtual void modifyHP(int delta) = 0;
+    virtual void modifyHP(int delta, ThrdIdx threadIdx) = 0;
 
 protected:
     ~ObjectAPI() = default;
@@ -37,7 +39,10 @@ protected:
 
 struct Object : public ObjectAPI
 {
-    Object(ObjectId id) : ObjectAPI{id} {}
+    Object(ObjectId id)
+        : ObjectAPI{id}
+        , m_healthDelta{} // put it here as a workaround for VC++2013RC ICE
+    {}
 
     Point m_pos;
     PlayerState m_state{PlayerState::Idle};
@@ -52,11 +57,11 @@ struct Object : public ObjectAPI
     ActionData m_nextAction;
 
     ticks_t m_timerDeadline;
-    std::function<void(Object&)> m_timerCallback;
+    std::function<void(Object&, ThrdIdx)> m_timerCallback;
 
-    bool m_erased{false};
+    volatile bool m_erased{false};
 
-    int m_healthDelta{0};
+    std::array<int, MaxThreads> m_healthDelta;
 
     Point moveDest() const
     {
@@ -98,5 +103,8 @@ private: // ObjectAPI implementation
 
     virtual void disconnect() override { m_erased = true; }
     
-    virtual void modifyHP(int delta) { m_healthDelta += delta; }
+    virtual void modifyHP(int delta, ThrdIdx threadIdx)
+    {
+        m_healthDelta[threadIdx] += delta;
+    }
 };
