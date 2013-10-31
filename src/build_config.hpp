@@ -6,3 +6,4 @@
 #endif
 
 static const auto MaxThreads = 4;
+static const auto ThreadBlockSize = 1024;

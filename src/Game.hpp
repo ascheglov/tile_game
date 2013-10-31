@@ -2,11 +2,13 @@
 
 #include <cassert>
 #include <algorithm>
+#include <atomic>
 #include <deque>
 #include <functional>
 #include <list>
 #include <memory>
 #include <numeric>
+#include <thread>
 #include <unordered_map>
 
 #include "GameCfg.hpp"
@@ -58,22 +60,59 @@ public:
     void parallel_for_each(F&& f)
     {
         assert(m_threadsCount == 1);
-        for (auto&& el : m_arr)
-            if (!el.m_isFree)
-                f(el, 0);
+        auto n = m_arr.size();
+        if (n <= ThreadBlockSize)
+        {
+            for_idx(0, n, f, 0);
+            return;
+        }
+
+        std::atomic<unsigned> nextBlockBase{0};
+
+        auto&& threadFn = [&](unsigned threadIdx)
+        {
+            for (;;)
+            {
+                auto blockBase = nextBlockBase.fetch_add(ThreadBlockSize);
+                if (blockBase >= n)
+                    return;
+
+                for_idx(blockBase, ThreadBlockSize, f, threadIdx);
+            }
+        };
+
+        std::vector<std::thread> threads;
+        for (auto threadIdx = 1u; threadIdx < m_threadsCount; ++threadIdx)
+            threads.emplace_back(threadFn, threadIdx);
+
+        threadFn(0);
+
+        for (auto&& th : threads)
+            th.join();
     }
 
     template<typename F>
     void for_each(F&& f)
     {
-        for (auto&& el : m_arr)
-            if (!el.m_isFree)
-                f(el);
+        for_idx(0, m_arr.size(), f);
     }
 
 private:
     static unsigned id2idx(ObjectId id) { return (id >> 8) & 0x0FFF; }
     static ObjectId idx2id(unsigned idx, unsigned ver) { return (idx << 8) | ver & 0xFF | 0x10000000; }
+
+    template<typename F, typename... Ts>
+    void for_idx(unsigned base, unsigned n, F&& f, Ts&&... ts)
+    {
+        auto lastIdx = base + n;
+        if (lastIdx > m_arr.size()) lastIdx = m_arr.size();
+
+        for (auto it = begin(m_arr) + base, E = begin(m_arr) + lastIdx; it != E; ++it)
+        {
+            if (!it->m_isFree)
+                f(*it, ts...);
+        }
+    }
 
     std::deque<Object> m_arr;
     std::list<unsigned> m_free;
