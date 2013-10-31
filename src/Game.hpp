@@ -18,6 +18,8 @@
 class ObjectManager
 {
 public:
+    ObjectManager(unsigned threadsCount) : m_threadsCount{threadsCount} {}
+
     Object& newObject()
     {
         if (m_free.empty())
@@ -53,9 +55,9 @@ public:
     }
 
     template<typename F>
-    void parallel_for(unsigned threads, F&& f)
+    void parallel_for_each(F&& f)
     {
-        assert(threads == 1);
+        assert(m_threadsCount == 1);
         for (auto&& el : m_arr)
             if (!el.m_isFree)
                 f(el, 0);
@@ -75,6 +77,8 @@ private:
 
     std::deque<Object> m_arr;
     std::list<unsigned> m_free;
+
+    unsigned m_threadsCount;
 };
 
 struct Geodata
@@ -463,8 +467,7 @@ private:
 
     void updateHealth(Object& obj)
     {
-        auto&& arrFirst = begin(obj.m_healthDelta);
-        int hpDelta = std::accumulate(arrFirst, arrFirst + m_cfg.threadsCount, 0);
+        int hpDelta = std::accumulate(begin(obj.m_healthDelta), end(obj.m_healthDelta), 0);
         obj.m_healthDelta.fill(0);
 
         if (obj.m_health > -hpDelta)
@@ -512,7 +515,7 @@ private:
 
     void updateObjects()
     {
-        m_objects.parallel_for(m_cfg.threadsCount, [&](Object& obj, ThrdIdx threadIdx)
+        m_objects.parallel_for_each([&](Object& obj, ThrdIdx threadIdx)
         {
             if (!obj.m_nextAction.empty())
             {
@@ -560,7 +563,7 @@ private:
         obj.m_timerCallback = std::forward<Callback>(callback);
     }
 
-    ObjectManager m_objects;
+    ObjectManager m_objects{m_cfg.threadsCount};
     World m_world{m_cfg.worldCX, m_cfg.worldCY};
     ticks_t m_now{0};
 };
