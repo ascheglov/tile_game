@@ -11,13 +11,11 @@ struct TestClient : EventHandler, FullPlayerInfo
 
     bool m_isConnected{false};
 
-    std::unordered_map<ObjectId, FullPlayerInfo> see;
-
     int m_health;
 
-    TestClient(Game& game, Point pos) : m_game{&game}
+    TestClient(Game& game, std::string name, Point pos) : m_game{&game}
     {
-        game.newPlayer(*this, pos);
+        game.newPlayer(*this, pos, std::move(name));
     }
 
     void requestDisconnect()
@@ -55,12 +53,35 @@ struct TestClient : EventHandler, FullPlayerInfo
         return it->second.first;
     }
 
+    bool seeNothing() const
+    {
+        return m_see.empty();
+    }
+
+    bool doSee(const std::string& name) const
+    {
+        for (auto&& o : m_see)
+            if (o.second.m_name == name)
+                return true;
+
+        return false;
+    }
+
+    const FullPlayerInfo& see(const std::string& name) const
+    {
+        for (auto&& o : m_see)
+            if (o.second.m_name == name)
+                return o.second;
+
+        throw std::out_of_range{"name"};
+    }
+
 private:
     FullPlayerInfo& findInfo(ObjectId id)
     {
         if (id == m_id) return *this;
-        assert(see.count(id) != 0);
-        return see[id];
+        assert(m_see.count(id) != 0);
+        return m_see[id];
     }
 
     virtual void init(ObjectId assignedId, const Point& pos, int health) override
@@ -76,8 +97,8 @@ private:
     virtual void seePlayer(const FullPlayerInfo& info) override
     {
         assert(m_id != info.m_id);
-        assert(see.count(info.m_id) == 0);
-        see[info.m_id] = info;
+        assert(m_see.count(info.m_id) == 0);
+        m_see[info.m_id] = info;
     }
 
     virtual void disconnect() override
@@ -88,8 +109,8 @@ private:
     virtual void seeDisappear(ObjectId id) override
     {
         assert(m_id != id);
-        assert(see.count(id) != 0);
-        see.erase(id);
+        assert(m_see.count(id) != 0);
+        m_see.erase(id);
     }
 
     virtual void seeBeginMove(const MoveInfo& info) override
@@ -151,4 +172,5 @@ private:
     }
 
     std::unordered_map<Point, std::pair<Effect, ticks_t>> m_effects;
+    std::unordered_map<ObjectId, FullPlayerInfo> m_see;
 };

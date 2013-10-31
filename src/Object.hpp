@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <string>
 
 #include "types.hpp"
 #include "events.hpp"
@@ -44,6 +45,8 @@ struct Object : public ObjectAPI
         , m_healthDelta{} // put it here as a workaround for VC++2013RC ICE
     {}
 
+    std::string m_name;
+
     Point m_pos;
     PlayerState m_state{PlayerState::Idle};
 
@@ -78,6 +81,7 @@ struct Object : public ObjectAPI
         inf.m_state = m_state;
         inf.m_moveDir = m_moveDir;
         inf.m_spell = m_spell;
+        inf.m_name = m_name;
         return inf;
     }
 

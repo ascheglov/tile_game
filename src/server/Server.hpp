@@ -71,7 +71,7 @@ private:
         m_conn[connId]->sendWorldMap(m_gameCfg.worldCX, m_worldMap);
 
         Point pos{(int)connId % m_game.m_cfg.worldCX, (int)connId % m_game.m_cfg.worldCY};
-        m_game.newPlayer(*m_conn[connId], pos);
+        m_game.newPlayer(*m_conn[connId], pos, std::to_string(connId));
     }
 
     void onMessage(websocket::ConnectionId connId, const std::string& msg)

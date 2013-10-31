@@ -10,11 +10,11 @@ TEST_CASE("hit with lightning", "[game]")
 {
     Game game{TestGameCfg};
 
-    TestClient A{game, {1, 1}};
-    TestClient B{game, {2, 2}};
+    TestClient A{game, "A", {1, 1}};
+    TestClient B{game, "B", {2, 2}};
 
     REQUIRE(B.m_health == 100);
-    REQUIRE_FALSE(A.see.empty());
+    REQUIRE_FALSE(A.seeNothing());
 
     A.requestCast(Spell::Lightning, {2, 2});
     game.tick();
@@ -27,5 +27,5 @@ TEST_CASE("hit with lightning", "[game]")
     game.tick();
 
     REQUIRE_FALSE(B.m_isConnected);
-    REQUIRE(A.see.empty());
+    REQUIRE(A.seeNothing());
 }

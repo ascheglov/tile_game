@@ -10,6 +10,7 @@ struct FullPlayerInfo
     PlayerState m_state;
     Dir m_moveDir;
     Spell m_spell;
+    std::string m_name;
 };
 
 struct MoveInfo

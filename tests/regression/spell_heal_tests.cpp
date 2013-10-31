@@ -10,8 +10,8 @@ TEST_CASE("self-heal", "[game]")
 {
     Game game{TestGameCfg};
 
-    TestClient A{game, {1, 1}};
-    TestClient B{game, {2, 2}};
+    TestClient A{game, "A", {1, 1}};
+    TestClient B{game, "B", {2, 2}};
 
     A.requestCast(Spell::Lightning, {2, 2});
     game.tick();

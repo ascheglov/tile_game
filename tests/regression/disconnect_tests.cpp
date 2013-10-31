@@ -10,7 +10,7 @@ TEST_CASE("disconnect single client", "[game]")
 {
     Game game{TestGameCfg};
 
-    TestClient A(game, {3, 2});
+    TestClient A(game, "A", {3, 2});
     REQUIRE(A.m_isConnected);
 
     A.requestDisconnect();
@@ -22,24 +22,24 @@ TEST_CASE("see other disconnects", "[game]")
 {
     Game game{TestGameCfg};
 
-    TestClient A(game, {1, 1});
-    TestClient B(game, {2, 2});
+    TestClient A(game, "A", {1, 1});
+    TestClient B(game, "B", {2, 2});
 
-    REQUIRE_FALSE(A.see.empty());
+    REQUIRE_FALSE(A.seeNothing());
     B.requestDisconnect();
     game.tick();
-    REQUIRE(A.see.empty());
+    REQUIRE(A.seeNothing());
 }
 
 TEST_CASE("other disconnects far away", "[game]")
 {
     Game game{TestGameCfg};
 
-    TestClient A(game, {1, 1});
-    TestClient B(game, {7, 7});
+    TestClient A(game, "A", {1, 1});
+    TestClient B(game, "B", {7, 7});
 
-    REQUIRE(A.see.empty());
+    REQUIRE(A.seeNothing());
     B.requestDisconnect();
     game.tick();
-    REQUIRE(A.see.empty());
+    REQUIRE(A.seeNothing());
 }

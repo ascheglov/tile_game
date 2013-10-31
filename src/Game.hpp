@@ -184,7 +184,7 @@ public:
             objPtr->setNextAction(action);
     }
 
-    void newPlayer(EventHandler& eventHandler, Point pos)
+    void newPlayer(EventHandler& eventHandler, Point pos, std::string name)
     {
         if (auto objPtr = objectAt(pos))
         {
@@ -195,6 +195,7 @@ public:
         auto&& obj = m_objects.newObject();
         obj.m_eventHandler = &eventHandler;
 
+        obj.m_name = std::move(name);
         obj.m_pos = pos;
      
         obj.m_eventHandler->init(obj.m_id, obj.m_pos, obj.m_health);

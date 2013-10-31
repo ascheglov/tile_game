@@ -10,47 +10,47 @@ TEST_CASE("spawn one", "[game]")
 {
     Game game{TestGameCfg};
 
-    TestClient A(game, {3, 2});
+    TestClient A(game, "A", {3, 2});
 
     REQUIRE(A.m_id == 1);
     REQUIRE(A.m_pos == Point(3, 2));
-    REQUIRE(A.see.empty());
+    REQUIRE(A.seeNothing());
 }
 
 TEST_CASE("spawn two nearby", "[game]")
 {
     Game game{TestGameCfg};
 
-    TestClient A(game, {3, 1});
-    TestClient B(game, {3, 2});
+    TestClient A(game, "A", {3, 1});
+    TestClient B(game, "B", {3, 2});
 
     REQUIRE(B.m_id == 2);
     REQUIRE(B.m_pos == Point(3, 2));
-    REQUIRE(B.see[1].m_pos == Point(3, 1));
+    REQUIRE(B.see("A").m_pos == Point(3, 1));
 
-    REQUIRE(A.see[2].m_pos == Point(3, 2));
+    REQUIRE(A.see("B").m_pos == Point(3, 2));
 }
 
 TEST_CASE("spawn two apart", "[game]")
 {
     Game game{TestGameCfg};
 
-    TestClient A(game, {0, 0});
-    TestClient B(game, {7, 7});
+    TestClient A(game, "A", {0, 0});
+    TestClient B(game, "B", {7, 7});
 
-    REQUIRE(A.see.empty());
-    REQUIRE(B.see.empty());
+    REQUIRE(A.seeNothing());
+    REQUIRE(B.seeNothing());
 }
 
 TEST_CASE("spawn on occupied cell", "[game]")
 {
     Game game{TestGameCfg};
 
-    TestClient A{game, {1, 1}};
-    TestClient B{game, {2, 1}};
-    REQUIRE(B.see.count(1) == 1);
+    TestClient A{game, "A", {1, 1}};
+    TestClient B{game, "B", {2, 1}};
+    REQUIRE(B.doSee("A"));
 
-    TestClient C{game, {1, 1}};
-    REQUIRE(B.see.count(1) == 0);
-    REQUIRE(B.see.count(3) == 1);
+    TestClient C{game, "C", {1, 1}};
+    REQUIRE_FALSE(B.doSee("A"));
+    REQUIRE(B.doSee("C"));
 }
