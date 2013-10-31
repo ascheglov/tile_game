@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cassert>
+#include <algorithm>
+#include <deque>
 #include <functional>
 #include <list>
 #include <memory>
@@ -18,29 +20,61 @@ class ObjectManager
 public:
     Object& newObject()
     {
-        ++m_lastObjectId;
-        m_objects[m_lastObjectId] = std::make_shared<Object>(m_lastObjectId);
-        return *m_objects[m_lastObjectId];
+        if (m_free.empty())
+        {
+            m_arr.emplace_back(idx2id(m_arr.size(), 0));
+            return m_arr.back();
+        }
+
+        auto idx = m_free.front();
+        m_free.pop_front();
+        auto& el = m_arr[idx];
+        assert(el.m_isFree);
+        el = Object(idx2id(idx, el.m_id + 1));
+        return el;
     }
 
     ObjectAPI* findObject(ObjectId id)
     {
-        auto it = m_objects.find(id);
-        return it == m_objects.end() ? nullptr : it->second.get();
+        auto idx = id2idx(id);
+        if (idx >= m_arr.size())
+            return nullptr;
+        auto&& el = m_arr[idx];
+        return (!el.m_isFree && el.m_id == id) ? &el : nullptr;
     }
 
-    std::unordered_map<ObjectId, std::shared_ptr<Object>> m_objects;
+    void eraseObject(Object& obj)
+    {
+        auto idx = id2idx(obj.m_id);
+        assert(idx < m_arr.size());
+        assert(std::find(m_free.begin(), m_free.end(), idx) == m_free.end());
+        m_free.push_front(idx);
+        obj.m_isFree = true;
+    }
 
     template<typename F>
     void parallel_for(unsigned threads, F&& f)
     {
         assert(threads == 1);
-        for (auto&& p : m_objects)
-            f(p.second, 0);
+        for (auto&& el : m_arr)
+            if (!el.m_isFree)
+                f(el, 0);
+    }
+
+    template<typename F>
+    void for_each(F&& f)
+    {
+        for (auto&& el : m_arr)
+            if (!el.m_isFree)
+                f(el);
     }
 
 private:
-    ObjectId m_lastObjectId{0};
+    static unsigned id2idx(ObjectId id) { return (id >> 8) & 0x0FFF; }
+    static ObjectId idx2id(unsigned idx, unsigned ver) { return (idx << 8) | ver & 0xFF | 0x10000000; }
+
+    std::deque<Object> m_arr;
+    std::list<unsigned> m_free;
 };
 
 struct Geodata
@@ -198,7 +232,12 @@ public:
         obj.m_name = std::move(name);
         obj.m_pos = pos;
      
-        obj.m_eventHandler->init(obj.m_id, obj.m_pos, obj.m_health);
+        InitInfo initInfo;
+        initInfo.m_id = obj.m_id;
+        initInfo.m_name = obj.m_name;
+        initInfo.m_pos = obj.m_pos;
+        initInfo.m_health = obj.m_health;
+        obj.m_eventHandler->init(initInfo);
 
         assert(m_world.objectAt(pos) == 0);
         m_world.addObject(obj.m_id, obj.m_pos);
@@ -442,12 +481,11 @@ private:
     template<typename Callback>
     void forObjectsAround(Point pt, Callback&& callback)
     {
-        for (auto&& objPair : m_objects.m_objects)
+        m_objects.for_each([&](Object& obj)
         {
-            auto& obj = *objPair.second;
             if (distance(pt, obj.m_pos) <= m_cfg.playerViewRadius)
                 callback(obj);
-        }
+        });
     }
 
     void dispatchAction(Object& obj, const ActionData& a)
@@ -474,11 +512,8 @@ private:
 
     void updateObjects()
     {
-        decltype(m_objects.m_objects) newTable;
-        m_objects.parallel_for(m_cfg.threadsCount, [&](const std::shared_ptr<Object>& objPtr, ThrdIdx threadIdx)
+        m_objects.parallel_for(m_cfg.threadsCount, [&](Object& obj, ThrdIdx threadIdx)
         {
-            auto&& obj = *objPtr;
-
             if (!obj.m_nextAction.empty())
             {
                 dispatchAction(obj, obj.m_nextAction);
@@ -491,26 +526,18 @@ private:
                 callback.swap(obj.m_timerCallback);
                 callback(obj, threadIdx);
             }
-
-            newTable[obj.m_id] = objPtr;
         });
 
-        for (auto nextIter = begin(newTable), E = end(newTable); nextIter != E; )
+        m_objects.for_each([&](Object& obj)
         {
-            auto currentIter = nextIter;
-            ++nextIter;
-            auto&& obj = *currentIter->second;
-            
             updateHealth(obj);
 
             if (obj.m_erased)
             {
                 onDisconnect(obj);
-                newTable.erase(currentIter);
+                m_objects.eraseObject(obj);
             }
-        }
-
-        m_objects.m_objects.swap(newTable);
+        });
     }
 
     ObjectAPI* objectAt(const Point& pt)

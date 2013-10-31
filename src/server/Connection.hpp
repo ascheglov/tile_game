@@ -28,15 +28,16 @@ private:
         m_server->sendText(m_connId, pb.close());
     }
 
-    virtual void init(ObjectId assignedId, const Point& pos, int health) override
+    virtual void init(const InitInfo& info) override
     {
-        m_objId = assignedId;
+        m_objId = info.m_id;
 
         PacketBuilder p("init");
-        p.field("id", assignedId);
-        p.field("x", pos.x);
-        p.field("y", pos.y);
-        p.field("hp", health);
+        p.field("id", info.m_id);
+        p.field("x", info.m_pos.x);
+        p.field("y", info.m_pos.y);
+        p.field("hp", info.m_health);
+        p.field("name", info.m_name);
         send(p);
     }
 
@@ -48,6 +49,7 @@ private:
         p.field("state", static_cast<int>(info.m_state));
         p.field("x", info.m_pos.x);
         p.field("y", info.m_pos.y);
+        p.field("name", info.m_name);
         send(p);
     }
 

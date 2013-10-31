@@ -3,6 +3,14 @@
 #include "types.hpp"
 #include "math.hpp"
 
+struct InitInfo
+{
+    ObjectId m_id;
+    std::string m_name;
+    Point m_pos;
+    int m_health;
+};
+
 struct FullPlayerInfo
 {
     ObjectId m_id;
@@ -42,7 +50,7 @@ struct SpellEffect
 
 struct EventHandler
 {
-    virtual void init(ObjectId assignedId, const Point& pos, int health) = 0;
+    virtual void init(const InitInfo& info) = 0;
 
     virtual void seePlayer(const FullPlayerInfo& info) = 0;
 

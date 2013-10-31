@@ -20,7 +20,13 @@ struct ActionData
     void clear() { m_action = Action::None; }
 };
 
-struct ObjectAPI
+class TableBase
+{
+    friend class ObjectManager;
+    bool m_isFree{false};
+};
+
+struct ObjectAPI : TableBase
 {
     ObjectAPI(ObjectId id) : m_id{id} {}
 

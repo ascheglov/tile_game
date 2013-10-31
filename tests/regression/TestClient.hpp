@@ -84,13 +84,14 @@ private:
         return m_see[id];
     }
 
-    virtual void init(ObjectId assignedId, const Point& pos, int health) override
+    virtual void init(const InitInfo& info) override
     {
         assert(!m_isConnected);
         m_isConnected = true;
-        m_id = assignedId;
-        m_pos = pos;
-        m_health = health;
+        m_id = info.m_id;
+        m_pos = info.m_pos;
+        m_health = info.m_health;
+        m_name = info.m_name;
         m_state = PlayerState::Idle;
     }
 

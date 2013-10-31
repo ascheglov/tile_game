@@ -12,7 +12,8 @@ TEST_CASE("spawn one", "[game]")
 
     TestClient A(game, "A", {3, 2});
 
-    REQUIRE(A.m_id == 1);
+    REQUIRE(A.m_id != 0);
+    REQUIRE(A.m_name == "A");
     REQUIRE(A.m_pos == Point(3, 2));
     REQUIRE(A.seeNothing());
 }
@@ -24,7 +25,7 @@ TEST_CASE("spawn two nearby", "[game]")
     TestClient A(game, "A", {3, 1});
     TestClient B(game, "B", {3, 2});
 
-    REQUIRE(B.m_id == 2);
+    REQUIRE(A.m_id != B.m_id);
     REQUIRE(B.m_pos == Point(3, 2));
     REQUIRE(B.see("A").m_pos == Point(3, 1));
 
