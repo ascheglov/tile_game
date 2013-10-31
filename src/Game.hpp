@@ -89,7 +89,7 @@ public:
     {
         m_objectTable.resize(m_cy);
         for (auto& v : m_objectTable)
-            v.resize(cx, '0');
+            v.resize(cx);
     }
 
     ObjectId objectAt(const Point& pt) const
@@ -101,7 +101,6 @@ public:
     {
         assert(isValidPoint(pt));
         assert(objectAt(pt) == 0);
-        assert(realId(id) < 10); // otherwise it won't fit in [1; 9]
         setAt(pt, id);
     }
 
@@ -147,21 +146,17 @@ private:
     void setAt(const Point& pt, ObjectId id)
     {
         assert(isValidPoint(pt));
-        if ((id & CellLockFlag) == 0)
-            m_objectTable[pt.y][pt.x] = wchar_t(id + '0');
-        else
-            m_objectTable[pt.y][pt.x] = wchar_t(id - 1 + L'\x2460');
+        m_objectTable[pt.y][pt.x] = id;
     }
 
     ObjectId getAt(const Point& pt) const
     {
         assert(isValidPoint(pt));
-        auto ch = m_objectTable[pt.y][pt.x];
-        return (ch < 0x100) ? (ch - '0') : ((ch - 0x2460 + 1) | CellLockFlag);
+        return m_objectTable[pt.y][pt.x];
     }
 
     int m_cx, m_cy;
-    std::vector<std::wstring> m_objectTable;
+    std::vector<std::vector<ObjectId>> m_objectTable;
 };
 
 class Game
