@@ -26,7 +26,7 @@ public:
     {
         if (m_free.empty())
         {
-            m_arr.emplace_back(idx2id(m_arr.size(), 0));
+            m_arr.emplace_back(ObjectId{m_arr.size()});
             return m_arr.back();
         }
 
@@ -34,13 +34,14 @@ public:
         m_free.pop_front();
         auto& el = m_arr[idx];
         assert(el.m_isFree);
-        el = Object(idx2id(idx, el.m_id + 1));
+        ++el.m_id.f.version;
+        el = Object(el.m_id);
         return el;
     }
 
     ObjectAPI* findObject(ObjectId id)
     {
-        auto idx = id2idx(id);
+        auto idx = id.f.index;
         if (idx >= m_arr.size())
             return nullptr;
         auto&& el = m_arr[idx];
@@ -49,7 +50,7 @@ public:
 
     void eraseObject(Object& obj)
     {
-        auto idx = id2idx(obj.m_id);
+        auto idx = obj.m_id.f.index;
         assert(idx < m_arr.size());
         assert(std::find(m_free.begin(), m_free.end(), idx) == m_free.end());
         m_free.push_front(idx);
@@ -98,9 +99,6 @@ public:
     }
 
 private:
-    static unsigned id2idx(ObjectId id) { return (id >> 8) & 0x0FFF; }
-    static ObjectId idx2id(unsigned idx, unsigned ver) { return (idx << 8) | ver & 0xFF | 0x10000000; }
-
     template<typename F, typename... Ts>
     void for_idx(unsigned base, unsigned n, F&& f, Ts&&... ts)
     {
@@ -171,48 +169,55 @@ public:
 
     ObjectId objectAt(const Point& pt) const
     {
-        return isValidPoint(pt) ? getAt(pt) : 0;
+        return isValidPoint(pt) ? getAt(pt) : ObjectId{};
     }
 
     void addObject(ObjectId id, const Point& pt)
     {
         assert(isValidPoint(pt));
-        assert(objectAt(pt) == 0);
+        assert(!objectAt(pt));
         setAt(pt, id);
     }
 
     void removeObject(const Point& pt)
     {
-        assert(objectAt(pt) != 0);
-        setAt(pt, 0);
+        assert(objectAt(pt));
+        setAt(pt, {});
     }
 
     void lockCell(ObjectId lockOwner, const Point& pt)
     {
-        addObject(lockOwner | CellLockFlag, pt);
+        addObject(makeLockId(lockOwner), pt);
     }
 
     void moveToCell(const Point& from, const Point& dest)
     {
         assert(isLocked(dest));
         auto id = objectAt(from);
-        assert(id == realId(objectAt(dest)));
+        assert(id == withoutReserved(objectAt(dest)));
         removeObject(from);
         removeObject(dest);
         addObject(id, dest);
     }
 
 private:
-    static const ObjectId CellLockFlag = 0x80000000;
+    static const std::uint8_t CellLockFlag = 0x80;
 
-    static ObjectId realId(ObjectId maskedId)
+    static ObjectId withoutReserved(ObjectId id)
     {
-        return maskedId & ~CellLockFlag;
+        id.f.reserved = 0;
+        return id;
+    }
+
+    ObjectId makeLockId(ObjectId id) const
+    {
+        id.f.reserved |= CellLockFlag;
+        return id;
     }
 
     bool isLocked(const Point& pt)
     {
-        return (objectAt(pt) & CellLockFlag) != 0;
+        return (objectAt(pt).f.reserved & CellLockFlag) != 0;
     }
 
     bool isValidPoint(const Point& pt) const
@@ -282,7 +287,7 @@ public:
         initInfo.m_health = obj.m_health;
         obj.m_eventHandler->init(initInfo);
 
-        assert(m_world.objectAt(pos) == 0);
+        assert(!m_world.objectAt(pos));
         m_world.addObject(obj.m_id, obj.m_pos);
 
         auto&& newPlayerInfo = obj.getFullInfo();
@@ -330,7 +335,7 @@ private:
         if (!m_geodata.canMove(srcPt, moveDir))
             return false;
 
-        if (m_world.objectAt(destPt) != 0)
+        if (m_world.objectAt(destPt))
             return false;
 
         return true;

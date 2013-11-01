@@ -1,6 +1,9 @@
 #pragma once
 
+#include <cassert>
+#include <cstdint>
 #include <sstream>
+#include "types.hpp"
 
 class PacketBuilder
 {
@@ -12,6 +15,18 @@ public:
 
     PacketBuilder& field(const char* name, int value)
     {
+        ss << ",\"" << name << "\":" << value;
+        return *this;
+    }
+
+    PacketBuilder& field(const char* name, ObjectId id)
+    {
+        return field(name, id.value);
+    }
+
+    PacketBuilder& field(const char* name, std::uint64_t value)
+    {
+        assert(double(value) == value && "value won't fit in JS Number");
         ss << ",\"" << name << "\":" << value;
         return *this;
     }

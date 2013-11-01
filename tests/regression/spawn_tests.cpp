@@ -12,7 +12,7 @@ TEST_CASE("spawn one", "[game]")
 
     TestClient A(game, "A", {3, 2});
 
-    REQUIRE(A.m_id != 0);
+    REQUIRE(A.m_id);
     REQUIRE(A.m_name == "A");
     REQUIRE(A.m_pos == Point(3, 2));
     REQUIRE(A.seeNothing());

@@ -77,7 +77,7 @@ private:
     void onMessage(websocket::ConnectionId connId, const std::string& msg)
     {
         auto objId = m_conn[connId]->objId();
-        assert(objId != 0);
+        assert(objId);
 
         ActionData actionData;
 
