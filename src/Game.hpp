@@ -48,13 +48,20 @@ public:
         return (!el.m_isFree && el.m_id == id) ? &el : nullptr;
     }
 
-    void eraseObject(Object& obj)
+    void eraseObject(Object& obj, ThrdIdx threadIdx)
     {
+        assert(threadIdx < MaxThreads);
+
         auto idx = obj.m_id.f.index;
         assert(idx < m_arr.size());
-        assert(std::find(m_free.begin(), m_free.end(), idx) == m_free.end());
-        m_free.push_front(idx);
+        m_freeLists[threadIdx].push_front(idx);
         obj.m_isFree = true;
+    }
+
+    void mergeErasedObjectsLists()
+    {
+        for (auto& lst : m_freeLists)
+            m_free.splice(m_free.end(), lst);
     }
 
     template<typename F>
@@ -113,6 +120,7 @@ private:
     }
 
     std::deque<Object> m_arr;
+    std::array<std::list<unsigned>, MaxThreads> m_freeLists;
     std::list<unsigned> m_free;
 
     unsigned m_threadsCount;
@@ -575,16 +583,18 @@ private:
             }
         });
 
-        m_objects.for_each([&](Object& obj)
+        m_objects.parallel_for_each([&](Object& obj, ThrdIdx threadIdx)
         {
             updateHealth(obj);
 
             if (obj.m_erased)
             {
                 onDisconnect(obj);
-                m_objects.eraseObject(obj);
+                m_objects.eraseObject(obj, threadIdx);
             }
         });
+
+        m_objects.mergeErasedObjectsLists();
     }
 
     ObjectAPI* objectAt(const Point& pt)
