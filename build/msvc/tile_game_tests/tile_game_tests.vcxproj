@@ -106,13 +106,16 @@ exit 0</Command>
     <ClInclude Include="..\..\..\src\events.hpp" />
     <ClInclude Include="..\..\..\src\Game.hpp" />
     <ClInclude Include="..\..\..\src\GameCfg.hpp" />
+    <ClInclude Include="..\..\..\src\Geodata.hpp" />
     <ClInclude Include="..\..\..\src\math.hpp" />
     <ClInclude Include="..\..\..\src\Object.hpp" />
+    <ClInclude Include="..\..\..\src\ObjectManager.hpp" />
     <ClInclude Include="..\..\..\src\server\Connection.hpp" />
     <ClInclude Include="..\..\..\src\server\Menu.hpp" />
     <ClInclude Include="..\..\..\src\server\PacketBuilder.hpp" />
     <ClInclude Include="..\..\..\src\server\Server.hpp" />
     <ClInclude Include="..\..\..\src\types.hpp" />
+    <ClInclude Include="..\..\..\src\World.hpp" />
     <ClInclude Include="..\..\..\tests\catch_wrap.hpp" />
     <ClInclude Include="..\..\..\tests\regression\TestClient.hpp" />
     <ClInclude Include="..\..\..\tests\regression\test_game_config.hpp" />
