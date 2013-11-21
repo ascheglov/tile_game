@@ -1,6 +1,6 @@
 #include "Game.hpp"
 
-#include "catch_wrap.hpp"
+#include "catch.hpp"
 #include "test_printers.hpp"
 
 #include "test_game_config.hpp"

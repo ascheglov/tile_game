@@ -3,6 +3,7 @@
 #include <array>
 #include <string>
 
+#include "build_config.hpp"
 #include "types.hpp"
 #include "events.hpp"
 #include "math.hpp"

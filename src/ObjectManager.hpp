@@ -6,6 +6,7 @@
 #include <list>
 #include <thread>
 
+#include "build_config.hpp"
 #include "types.hpp"
 #include "Object.hpp"
 

@@ -1,10 +1,1 @@
-Debug-*
-Release-*
-ipch/
-*.opensdf
-*.sdf
-*.sln.docstates
-*.user
-*.suo
-*.o
-*.exe
+out/

@@ -1,9 +1,8 @@
-#pragma warning(disable: 4913)
 #include "server/Menu.hpp"
 #include "server/Server.hpp"
 
 #define CATCH_CONFIG_RUNNER
-#include "catch_wrap.hpp"
+#include "catch.hpp"
 
 static void serverMain()
 {
