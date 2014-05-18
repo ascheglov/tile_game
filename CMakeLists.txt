@@ -18,7 +18,7 @@ include_directories(${Boost_INCLUDE_DIR})
 
 include_directories(
     src
-    tests
+    tests/common
     third_party
 )
 
