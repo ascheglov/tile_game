@@ -4,6 +4,7 @@
 
 struct GameCfg
 {
+	GameCfg() = default;
     int worldCX{8};
     int worldCY{8};
     int playerViewRadius{2};

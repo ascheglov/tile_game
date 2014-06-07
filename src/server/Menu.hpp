@@ -1,6 +1,11 @@
 #pragma once
 
+#if defined _MSC_VER
 #include <conio.h>
+#else
+#include "conio.hpp"
+#endif
+
 #include <iostream>
 
 class Menu

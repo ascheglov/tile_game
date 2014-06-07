@@ -2,4 +2,4 @@
 
 #include "GameCfg.hpp"
 
-const GameCfg TestGameCfg;
+constexpr GameCfg TestGameCfg{};

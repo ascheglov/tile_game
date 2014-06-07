@@ -9,11 +9,11 @@ if(MSVC)
     add_definitions(/W4 /WX)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
 else()
-    add_definitions(-std=c++11 -Wall -Werror -pedantic)
+    add_definitions(-std=c++1y -Wall -pedantic)
 endif()
 
 set(Boost_USE_STATIC_LIBS TRUE)
-find_package(Boost 1.55 COMPONENTS atomic chrono context coroutine date_time regex system thread REQUIRED)
+find_package(Boost 1.55 COMPONENTS atomic chrono coroutine context date_time regex system thread REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
 include_directories(

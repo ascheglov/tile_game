@@ -8,7 +8,7 @@
 class World
 {
 public:
-    explicit World(unsigned cx, unsigned cy)
+    explicit World(int cx, int cy)
         : m_cx(cx), m_cy(cy)
     {
         m_objectTable.resize(m_cy);

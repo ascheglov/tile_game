@@ -10,5 +10,8 @@ add_executable(regression_tests
     spell_heal_tests.cpp
     regression_tests.cpp)
 
-target_link_libraries(regression_tests ${Boost_LIBRARIES} ws2_32 mswsock)
+target_link_libraries(regression_tests ${Boost_LIBRARIES})
 
+if(WIN32)
+    target_link_libraries(regression_tests ws2_32 mswsock)
+endif()

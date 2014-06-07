@@ -5,6 +5,12 @@
 #include "math.hpp"
 #include "types.hpp"
 
+#ifndef _countof
+template<typename T, std::size_t N>
+char(*_countof_helper(T(&)[N]))[N];
+#define _countof(arr) sizeof(*_countof_helper(arr))
+#endif
+
 inline std::ostream& operator<<(std::ostream& o, const Point& pt)
 {
     o << '(' << pt.x << ", " << pt.y << ')';

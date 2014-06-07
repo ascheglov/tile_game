@@ -15,17 +15,19 @@ struct ObjectId
         f.flags = NonEmptyFlag;
     }
 
+	struct Fields
+	{
+		std::uint32_t index;
+		std::uint8_t version;
+		std::uint8_t flags;
+		std::uint16_t reserved;
+	};
+
     union
     {
         std::uint64_t value;
 
-        struct
-        {
-            std::uint32_t index;
-            std::uint8_t version;
-            std::uint8_t flags;
-            std::uint16_t reserved;
-        } f;
+        Fields f;
     };
 
     explicit operator bool() const { return (f.flags & NonEmptyFlag) != 0; }

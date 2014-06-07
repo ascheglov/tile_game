@@ -19,7 +19,7 @@ public:
     {
         if (m_free.empty())
         {
-            m_arr.emplace_back(ObjectId{m_arr.size()});
+            m_arr.emplace_back(ObjectId(m_arr.size()));
             return m_arr.back();
         }
 
